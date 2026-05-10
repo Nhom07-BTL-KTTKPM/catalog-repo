@@ -20,7 +20,7 @@ import java.util.UUID;
  * REST Controller for Category management
  */
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 public class CategoryController {
 

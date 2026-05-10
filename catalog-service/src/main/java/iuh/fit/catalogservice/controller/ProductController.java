@@ -19,7 +19,7 @@ import java.util.UUID;
  * REST Controller for Product management
  */
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
