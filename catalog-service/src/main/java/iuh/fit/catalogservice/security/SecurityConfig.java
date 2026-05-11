@@ -1,5 +1,6 @@
 package iuh.fit.catalogservice.security;
 
+import iuh.fit.catalogservice.config.InternalApiKeyProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -30,13 +32,15 @@ import java.util.Objects;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(AuthJwtProperties.class)
+@EnableConfigurationProperties({AuthJwtProperties.class, InternalApiKeyProperties.class})
 public class SecurityConfig {
 
     private final AuthJwtProperties jwtProperties;
+    private final InternalApiKeyFilter internalApiKeyFilter;
 
-    public SecurityConfig(AuthJwtProperties jwtProperties) {
+    public SecurityConfig(AuthJwtProperties jwtProperties, InternalApiKeyFilter internalApiKeyFilter) {
         this.jwtProperties = jwtProperties;
+        this.internalApiKeyFilter = internalApiKeyFilter;
     }
 
     @Bean
@@ -46,11 +50,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                    .requestMatchers("/internal/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
+
+            http.addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
