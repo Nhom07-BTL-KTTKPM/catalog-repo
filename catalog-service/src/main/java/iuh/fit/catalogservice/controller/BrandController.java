@@ -20,7 +20,7 @@ import java.util.UUID;
  * REST Controller for Brand management
  */
 @RestController
-@RequestMapping("/api/v1/brands")
+@RequestMapping("/api/v1/catalog/brands")
 @RequiredArgsConstructor
 public class BrandController {
 
