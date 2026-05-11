@@ -34,12 +34,13 @@ public class SemanticSearchService {
         PGobject pgVector = toPgVector(vectorLiteral);
 
         String sql = "SELECT p.product_id, p.name, p.ingredients, p.usage_instructions, "
-                + "p.suitable_skin_types, p.skin_concerns, p.min_price, p.max_price, "
-                + "(1 - (e.embedding <=> ?::vector)) AS score "
-                + "FROM product_embeddings e "
-                + "JOIN products p ON p.product_id = e.product_id "
-                + "ORDER BY e.embedding <=> ?::vector "
-                + "LIMIT ?";
+            + "p.suitable_skin_types, p.skin_concerns, p.min_price, p.max_price, "
+            + "(1 - (e.embedding <=> ?::vector)) AS score "
+            + "FROM product_embeddings e "
+            + "JOIN products p ON p.product_id = e.product_id "
+            + "WHERE p.is_active = true "
+            + "ORDER BY e.embedding <=> ?::vector "
+            + "LIMIT ?";
 
         return jdbcTemplate.query(
                 sql,

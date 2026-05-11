@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -127,4 +128,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
      */
     @Query("SELECT COUNT(p) FROM Product p WHERE p.brand.id = :brandId AND p.isActive = true")
     long countByBrandIdAndIsActiveTrue(@Param("brandId") UUID brandId);
+
+        @EntityGraph(attributePaths = {"brand", "category"})
+        @Query("SELECT p FROM Product p")
+        Page<Product> findAllWithBrandAndCategory(Pageable pageable);
 }

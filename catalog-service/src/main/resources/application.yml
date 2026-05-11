@@ -41,6 +41,18 @@ internal:
     header-name: ${CATALOG_INTERNAL_API_HEADER_NAME:X-Internal-Api-Key}
     key: ${CATALOG_INTERNAL_API_KEY}
 
+embedding:
+  enabled: ${EMBEDDING_ENABLED:true}
+  provider: ${EMBEDDING_PROVIDER:gemini}
+  api-key: ${EMBEDDING_API_KEY}
+  model: ${EMBEDDING_MODEL:text-embedding-004}
+  endpoint: ${EMBEDDING_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/models}
+  vector-dimension: ${EMBEDDING_VECTOR_DIMENSION:768}
+  reindex:
+    enabled: ${EMBEDDING_REINDEX_ENABLED:true}
+    cron: ${EMBEDDING_REINDEX_CRON:0 0 * * * *}
+    batch-size: ${EMBEDDING_REINDEX_BATCH_SIZE:200}
+
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
