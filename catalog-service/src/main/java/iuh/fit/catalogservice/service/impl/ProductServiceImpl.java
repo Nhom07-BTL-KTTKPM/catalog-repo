@@ -40,13 +40,29 @@ public class ProductServiceImpl implements ProductService {
     private final BrandRepository brandRepository;
     private final ProductVariantRepository productVariantRepository;
 
+        /**
+         * Generate a unique slug from product name, handling duplicates
+         */
+        private String generateUniqueSlug(String baseSlug) {
+                String slug = baseSlug;
+                int counter = 1;
+                while (productRepository.existsBySlug(slug)) {
+                        slug = baseSlug + "-" + counter;
+                        counter++;
+                }
+                return slug;
+        }
+
     @Override
     public ProductResponse createProduct(ProductRequest request) {
-        log.info("Creating new product with slug: {}", request.getSlug());
+                log.info("Creating new product: {}", request.getName());
 
-        if (productRepository.existsBySlug(request.getSlug())) {
-            throw new IllegalArgumentException("Product with slug '" + request.getSlug() + "' already exists");
+                // Generate slug if not provided
+                String slug = request.getSlug();
+                if (slug == null || slug.isBlank()) {
+                        slug = iuh.fit.catalogservice.util.SlugGenerator.generate(request.getName());
         }
+                slug = generateUniqueSlug(slug);
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + request.getCategoryId()));
@@ -56,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = Product.builder()
                 .name(request.getName())
-                .slug(request.getSlug())
+                .slug(slug)
                 .description(request.getDescription())
                 .ingredients(request.getIngredients())
                 .usageInstructions(request.getUsageInstructions())
@@ -81,9 +97,13 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + id));
 
-        if (!product.getSlug().equals(request.getSlug()) &&
-            productRepository.existsBySlug(request.getSlug())) {
-            throw new IllegalArgumentException("Product with slug '" + request.getSlug() + "' already exists");
+                // Update slug if provided, otherwise keep existing
+                String slug = request.getSlug();
+                if (slug == null || slug.isBlank()) {
+                        slug = product.getSlug();  // Keep existing slug if not provided
+                } else if (!product.getSlug().equals(slug)) {
+                        // Generate unique slug if provided slug differs from current one
+                        slug = generateUniqueSlug(slug);
         }
 
         Category category = categoryRepository.findById(request.getCategoryId())
