@@ -48,6 +48,11 @@ public interface ProductService {
     Page<ProductResponse> getProductsByCategory(UUID categoryId, Pageable pageable);
 
     /**
+     * Get products by root category ID (includes all subcategories)
+     */
+    Page<ProductResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable);
+
+    /**
      * Get products by brand
      */
     Page<ProductResponse> getProductsByBrand(UUID brandId, Pageable pageable);
