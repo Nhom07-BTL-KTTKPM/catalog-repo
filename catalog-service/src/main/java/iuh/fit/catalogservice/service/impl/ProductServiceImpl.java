@@ -181,6 +181,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ProductResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable) {
+        log.debug("Fetching products for root category ID: {} (including subcategories)", rootCategoryId);
+
+        return productRepository.findByRootCategoryId(rootCategoryId, pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<ProductResponse> getProductsByBrand(UUID brandId, Pageable pageable) {
         log.debug("Fetching products for brand ID: {}", brandId);
 
