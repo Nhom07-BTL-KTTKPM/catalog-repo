@@ -12,6 +12,7 @@ import iuh.fit.catalogservice.repo.BrandRepository;
 import iuh.fit.catalogservice.repo.CategoryRepository;
 import iuh.fit.catalogservice.repo.ProductRepository;
 import iuh.fit.catalogservice.repo.ProductVariantRepository;
+import iuh.fit.catalogservice.service.ProductEmbeddingService;
 import iuh.fit.catalogservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final ProductVariantRepository productVariantRepository;
+        private final ProductEmbeddingService productEmbeddingService;
 
         /**
          * Generate a unique slug from product name, handling duplicates
@@ -84,8 +86,10 @@ public class ProductServiceImpl implements ProductService {
                 .brand(brand)
                 .build();
 
-        Product savedProduct = productRepository.save(product);
+                Product savedProduct = productRepository.save(product);
         log.info("Created product with ID: {}", savedProduct.getProductId());
+
+                productEmbeddingService.indexProduct(savedProduct);
 
         return mapToResponse(savedProduct);
     }
@@ -124,8 +128,10 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(category);
         product.setBrand(brand);
 
-        Product updatedProduct = productRepository.save(product);
+                Product updatedProduct = productRepository.save(product);
         log.info("Updated product with ID: {}", updatedProduct.getProductId());
+
+                productEmbeddingService.indexProduct(updatedProduct);
 
         return mapToResponse(updatedProduct);
     }

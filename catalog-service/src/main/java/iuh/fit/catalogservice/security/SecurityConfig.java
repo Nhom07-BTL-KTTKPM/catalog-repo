@@ -1,5 +1,6 @@
 package iuh.fit.catalogservice.security;
 
+import iuh.fit.catalogservice.config.InternalApiKeyProperties;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
@@ -28,17 +29,20 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(AuthJwtProperties.class)
+@EnableConfigurationProperties({AuthJwtProperties.class, InternalApiKeyProperties.class})
 public class SecurityConfig {
 
     private final AuthJwtProperties jwtProperties;
+    private final InternalApiKeyFilter internalApiKeyFilter;
 
-    public SecurityConfig(AuthJwtProperties jwtProperties) {
+    public SecurityConfig(AuthJwtProperties jwtProperties, InternalApiKeyFilter internalApiKeyFilter) {
         this.jwtProperties = jwtProperties;
+        this.internalApiKeyFilter = internalApiKeyFilter;
     }
 
     @Bean
@@ -49,6 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                    .requestMatchers("/internal/**").permitAll()
                     .requestMatchers(HttpMethod.GET,
                         "/api/v1/catalog/categories/**",
                         "/api/v1/catalog/brands/**",
@@ -59,6 +64,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
+
+            http.addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
