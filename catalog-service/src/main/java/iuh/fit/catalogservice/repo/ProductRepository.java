@@ -41,6 +41,17 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findByCategoryIdAndIsActiveTrue(@Param("categoryId") UUID categoryId, Pageable pageable);
 
     /**
+     * Lấy tất cả sản phẩm thuộc một root category cụ thể (và tất cả sub-categories của nó).
+     * Ví dụ: Lấy tất cả sản phẩm Skincare bao gồm cả Serum, Toner, Moisturizer (là con của Skincare).
+     */
+    @Query("SELECT DISTINCT p FROM Product p " +
+           "JOIN p.category c " +
+           "WHERE (c.id = :rootCategoryId OR c.parentId = :rootCategoryId) " +
+           "AND p.isActive = true " +
+           "ORDER BY p.createdAt DESC")
+    Page<Product> findByRootCategoryId(@Param("rootCategoryId") UUID rootCategoryId, Pageable pageable);
+
+    /**
      * Lấy tất cả sản phẩm thuộc một Thương hiệu cụ thể.
      */
     @Query("SELECT p FROM Product p WHERE p.brand.id = :brandId AND p.isActive = true")

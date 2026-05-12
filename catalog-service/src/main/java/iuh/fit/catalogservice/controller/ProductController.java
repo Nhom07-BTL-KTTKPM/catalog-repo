@@ -75,6 +75,14 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/category/root/{rootCategoryId}")
+    public ResponseEntity<Page<ProductResponse>> getProductsByRootCategory(
+            @PathVariable UUID rootCategoryId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductResponse> response = productService.getProductsByRootCategory(rootCategoryId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/brand/{brandId}")
     public ResponseEntity<Page<ProductResponse>> getProductsByBrand(
             @PathVariable UUID brandId,
