@@ -2,6 +2,7 @@ package iuh.fit.catalogservice.service.impl;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
+import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import iuh.fit.catalogservice.entity.Category;
 import iuh.fit.catalogservice.repo.CategoryRepository;
 import iuh.fit.catalogservice.service.CategoryService;
@@ -158,11 +159,25 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(readOnly = true)
     public List<CategoryResponse> searchCategories(String keyword) {
         log.debug("Searching categories with keyword: {}", keyword);
-        
+
         return categoryRepository.searchByName(keyword)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategorySummaryResponse> getActiveCategorySummaries() {
+        log.debug("Fetching active category summaries");
+        return categoryRepository.findAllActiveSummaries();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategorySummaryResponse> getRootCategorySummaries() {
+        log.debug("Fetching root active category summaries");
+        return categoryRepository.findRootActiveSummaries();
     }
 
     private CategoryResponse mapToResponse(Category category) {

@@ -2,6 +2,7 @@ package iuh.fit.catalogservice.controller;
 
 import iuh.fit.catalogservice.dto.request.BrandRequest;
 import iuh.fit.catalogservice.dto.response.BrandResponse;
+import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
 import iuh.fit.catalogservice.service.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +65,16 @@ public class BrandController {
     @GetMapping("/active")
     public ResponseEntity<List<BrandResponse>> getActiveBrands() {
         List<BrandResponse> response = brandService.getActiveBrands();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lấy danh sách rút gọn của các thương hiệu đang hoạt động.
+     * Trả về (id, name, slug, logoUrl) để hiển thị danh sách brand trên giao diện.
+     */
+    @GetMapping("/summary")
+    public ResponseEntity<List<BrandSummaryResponse>> getActiveBrandSummaries() {
+        List<BrandSummaryResponse> response = brandService.getActiveBrandSummaries();
         return ResponseEntity.ok(response);
     }
 
