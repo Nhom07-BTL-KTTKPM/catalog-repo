@@ -2,6 +2,7 @@ package iuh.fit.catalogservice.controller;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
+import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import iuh.fit.catalogservice.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +71,26 @@ public class CategoryController {
     @GetMapping("/root")
     public ResponseEntity<List<CategoryResponse>> getRootCategories() {
         List<CategoryResponse> response = categoryService.getRootCategories();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lấy danh sách rút gọn của toàn bộ danh mục đang hoạt động.
+     * Trả về (id, name, slug, imageUrl) - dùng cho menu, sidebar, filter UI.
+     */
+    @GetMapping("/summary")
+    public ResponseEntity<List<CategorySummaryResponse>> getActiveCategorySummaries() {
+        List<CategorySummaryResponse> response = categoryService.getActiveCategorySummaries();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lấy danh sách rút gọn của các danh mục gốc đang hoạt động (parentId = null).
+     * Dùng cho menu chính/khung danh mục ở trang chủ.
+     */
+    @GetMapping("/summary/root")
+    public ResponseEntity<List<CategorySummaryResponse>> getRootCategorySummaries() {
+        List<CategorySummaryResponse> response = categoryService.getRootCategorySummaries();
         return ResponseEntity.ok(response);
     }
 

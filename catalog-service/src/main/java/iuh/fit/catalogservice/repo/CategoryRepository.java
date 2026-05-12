@@ -55,5 +55,25 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      */
     @Query("SELECT c FROM Category c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND c.isActive = true")
     List<Category> searchByName(@Param("keyword") String keyword);
+
+    /**
+     * Lấy danh sách rút gọn (id, name, slug, imageUrl) của tất cả danh mục đang hoạt động.
+     * Sắp xếp theo displayOrder để giữ đúng thứ tự hiển thị do Admin cấu hình.
+     * Dùng cho menu, sidebar, bộ lọc trên giao diện.
+     */
+    @Query("SELECT new iuh.fit.catalogservice.dto.response.CategorySummaryResponse(" +
+            "c.id, c.name, c.slug, c.imageUrl) " +
+            "FROM Category c WHERE c.isActive = true ORDER BY c.displayOrder ASC")
+    List<iuh.fit.catalogservice.dto.response.CategorySummaryResponse> findAllActiveSummaries();
+
+    /**
+     * Lấy danh sách rút gọn của các danh mục gốc (parentId = null) đang hoạt động.
+     * Phù hợp cho thanh menu chính ở header trang chủ.
+     */
+    @Query("SELECT new iuh.fit.catalogservice.dto.response.CategorySummaryResponse(" +
+            "c.id, c.name, c.slug, c.imageUrl) " +
+            "FROM Category c WHERE c.isActive = true AND c.parentId IS NULL " +
+            "ORDER BY c.displayOrder ASC")
+    List<iuh.fit.catalogservice.dto.response.CategorySummaryResponse> findRootActiveSummaries();
 }
 

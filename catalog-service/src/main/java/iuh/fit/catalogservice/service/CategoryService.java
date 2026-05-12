@@ -2,6 +2,7 @@ package iuh.fit.catalogservice.service;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
+import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -62,5 +63,17 @@ public interface CategoryService {
      * Search categories by name
      */
     List<CategoryResponse> searchCategories(String keyword);
+
+    /**
+     * Get lightweight summaries (id, name, slug, imageUrl) of all active categories.
+     * Phù hợp cho menu, sidebar, filter UI.
+     */
+    List<CategorySummaryResponse> getActiveCategorySummaries();
+
+    /**
+     * Get lightweight summaries of root active categories (parentId = null).
+     * Phù hợp cho menu chính ở header trang chủ.
+     */
+    List<CategorySummaryResponse> getRootCategorySummaries();
 }
 

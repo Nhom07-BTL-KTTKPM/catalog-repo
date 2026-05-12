@@ -2,6 +2,7 @@ package iuh.fit.catalogservice.service.impl;
 
 import iuh.fit.catalogservice.dto.request.BrandRequest;
 import iuh.fit.catalogservice.dto.response.BrandResponse;
+import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
 import iuh.fit.catalogservice.entity.Brand;
 import iuh.fit.catalogservice.repo.BrandRepository;
 import iuh.fit.catalogservice.service.BrandService;
@@ -151,6 +152,13 @@ public class BrandServiceImpl implements BrandService {
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BrandSummaryResponse> getActiveBrandSummaries() {
+        log.debug("Fetching active brand summaries");
+        return brandRepository.findAllActiveSummaries();
     }
 
     private BrandResponse mapToResponse(Brand brand) {

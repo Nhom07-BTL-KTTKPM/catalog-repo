@@ -58,5 +58,14 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
      * @return Danh sách thương hiệu đang hoạt động thuộc quốc gia đó.
      */
     List<Brand> findByOriginCountryAndIsActiveTrue(String originCountry);
+
+    /**
+     * Lấy danh sách rút gọn (id, name, slug, logoUrl) của các thương hiệu đang hoạt động.
+     * Dùng để hiển thị nhanh trên giao diện (dropdown, danh sách brand ở trang chủ, bộ lọc...).
+     */
+    @Query("SELECT new iuh.fit.catalogservice.dto.response.BrandSummaryResponse(" +
+            "b.id, b.name, b.slug, b.logoUrl) " +
+            "FROM Brand b WHERE b.isActive = true ORDER BY b.name ASC")
+    List<iuh.fit.catalogservice.dto.response.BrandSummaryResponse> findAllActiveSummaries();
 }
 
