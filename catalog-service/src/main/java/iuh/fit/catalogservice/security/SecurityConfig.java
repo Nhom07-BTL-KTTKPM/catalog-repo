@@ -57,7 +57,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET,
                         "/api/v1/catalog/categories/**",
                         "/api/v1/catalog/brands/**",
-                        "/api/v1/catalog/products/**"
+                        "/api/v1/catalog/products/**",
+                        "/api/v1/catalog/variants/**"
                     ).permitAll()
                         .anyRequest().authenticated()
                 )
