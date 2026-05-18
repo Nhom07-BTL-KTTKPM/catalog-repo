@@ -1,6 +1,10 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  data:
+    web:
+      pageable:
+        page-serialization-mode: via_dto
   application:
     name: catalog-service
   datasource:

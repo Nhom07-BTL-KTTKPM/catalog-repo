@@ -1,9 +1,9 @@
 package iuh.fit.catalogservice.service;
 
-import iuh.fit.catalogservice.config.EmbeddingProperties;
-import iuh.fit.catalogservice.entity.Product;
-import iuh.fit.catalogservice.repo.ProductRepository;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,9 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import iuh.fit.catalogservice.config.EmbeddingProperties;
+import iuh.fit.catalogservice.entity.Product;
+import iuh.fit.catalogservice.repo.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -45,17 +46,8 @@ public class ProductEmbeddingService {
         if (product == null) {
             return;
         }
-        if (Boolean.FALSE.equals(product.getIsActive())) {
-            embeddingStore.delete(product.getProductId());
-            return;
-        }
         try {
-            String text = buildEmbeddingText(product);
-            if (!StringUtils.hasText(text)) {
-                return;
-            }
-            List<Double> embedding = embeddingClient.embed(text);
-            embeddingStore.upsert(product.getProductId(), embedding);
+            indexProductInternal(product);
         } catch (Exception ex) {
             log.warn("Failed to index product embedding for {}", product.getProductId(), ex);
         }
@@ -88,7 +80,7 @@ public class ProductEmbeddingService {
             page = productRepository.findAllWithBrandAndCategory(pageable);
             for (Product product : page.getContent()) {
                 try {
-                    indexProduct(product);
+                    indexProductInternal(product);
                     processed++;
                 } catch (Exception ex) {
                     failed++;
@@ -101,6 +93,21 @@ public class ProductEmbeddingService {
         Instant finishedAt = Instant.now();
         log.info("Embedding reindex completed: processed={}, failed={}", processed, failed);
         return new ReindexResult(processed, failed, startedAt, finishedAt);
+    }
+
+    private void indexProductInternal(Product product) {
+        if (Boolean.FALSE.equals(product.getIsActive())) {
+            embeddingStore.delete(product.getProductId());
+            return;
+        }
+
+        String text = buildEmbeddingText(product);
+        if (!StringUtils.hasText(text)) {
+            return;
+        }
+
+        List<Double> embedding = embeddingClient.embed(text);
+        embeddingStore.upsert(product.getProductId(), embedding);
     }
 
     private String buildEmbeddingText(Product product) {
