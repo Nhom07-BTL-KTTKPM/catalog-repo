@@ -1,11 +1,14 @@
 package iuh.fit.catalogservice.service.impl;
 
 import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductImageRequest;
+import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
 import iuh.fit.catalogservice.dto.response.ProductImageResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
 import iuh.fit.catalogservice.entity.Brand;
 import iuh.fit.catalogservice.entity.Category;
+import iuh.fit.catalogservice.entity.ProductImage;
 import iuh.fit.catalogservice.entity.Product;
 import iuh.fit.catalogservice.entity.ProductVariant;
 import iuh.fit.catalogservice.repo.BrandRepository;
@@ -59,6 +62,14 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse createProduct(ProductRequest request) {
                 log.info("Creating new product: {}", request.getName());
 
+                if (request.getVariants() == null || request.getVariants().isEmpty()) {
+                        throw new IllegalArgumentException("At least one product variant is required");
+                }
+
+                if (request.getImages() == null || request.getImages().isEmpty()) {
+                        throw new IllegalArgumentException("At least one product image is required");
+                }
+
                 // Generate slug if not provided
                 String slug = request.getSlug();
                 if (slug == null || slug.isBlank()) {
@@ -85,6 +96,10 @@ public class ProductServiceImpl implements ProductService {
                 .category(category)
                 .brand(brand)
                 .build();
+
+        applyImages(product, request.getImages());
+        applyVariants(product, request.getVariants());
+        updatePriceRange(product);
 
                 Product savedProduct = productRepository.save(product);
         log.info("Created product with ID: {}", savedProduct.getProductId());
@@ -117,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found with ID: " + request.getBrandId()));
 
         product.setName(request.getName());
-        product.setSlug(request.getSlug());
+        product.setSlug(slug);
         product.setDescription(request.getDescription());
         product.setIngredients(request.getIngredients());
         product.setUsageInstructions(request.getUsageInstructions());
@@ -135,6 +150,55 @@ public class ProductServiceImpl implements ProductService {
 
         return mapToResponse(updatedProduct);
     }
+
+        private void applyImages(Product product, List<ProductImageRequest> imageRequests) {
+                if (imageRequests == null || imageRequests.isEmpty()) {
+                        return;
+                }
+
+                imageRequests.forEach(imageRequest -> product.addImage(ProductImage.builder()
+                                .url(imageRequest.getUrl())
+                                .publicId(imageRequest.getPublicId())
+                                .altText(imageRequest.getAltText())
+                                .displayOrder(imageRequest.getDisplayOrder())
+                                .isPrimary(Boolean.TRUE.equals(imageRequest.getIsPrimary()))
+                                .build()));
+        }
+
+        private void applyVariants(Product product, List<ProductVariantRequest> variantRequests) {
+                if (variantRequests == null || variantRequests.isEmpty()) {
+                        return;
+                }
+
+                variantRequests.forEach(variantRequest -> product.addVariant(ProductVariant.builder()
+                                .sku(variantRequest.getSku())
+                                .variantName(variantRequest.getVariantName())
+                                .price(variantRequest.getPrice())
+                                .originalPrice(variantRequest.getOriginalPrice())
+                                .stockQuantity(variantRequest.getStockQuantity())
+                                .imageUrl(variantRequest.getImageUrl())
+                                .isActive(variantRequest.getIsActive())
+                                .build()));
+        }
+
+        private void updatePriceRange(Product product) {
+                if (product.getVariants() == null || product.getVariants().isEmpty()) {
+                        return;
+                }
+
+                BigDecimal minPrice = product.getVariants().stream()
+                                .map(ProductVariant::getPrice)
+                                .min(Comparator.naturalOrder())
+                                .orElse(null);
+
+                BigDecimal maxPrice = product.getVariants().stream()
+                                .map(ProductVariant::getPrice)
+                                .max(Comparator.naturalOrder())
+                                .orElse(null);
+
+                product.setMinPrice(minPrice);
+                product.setMaxPrice(maxPrice);
+        }
 
     @Override
     @Transactional(readOnly = true)
