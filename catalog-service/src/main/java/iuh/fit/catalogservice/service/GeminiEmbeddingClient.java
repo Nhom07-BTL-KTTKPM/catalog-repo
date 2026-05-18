@@ -2,7 +2,6 @@ package iuh.fit.catalogservice.service;
 
 import iuh.fit.catalogservice.config.EmbeddingProperties;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +15,6 @@ import java.util.List;
 
 @Service
 @ConditionalOnProperty(prefix = "embedding", name = "provider", havingValue = "gemini", matchIfMissing = true)
-@Slf4j
 public class GeminiEmbeddingClient implements EmbeddingClient {
 
     private final EmbeddingProperties properties;
@@ -60,8 +58,10 @@ public class GeminiEmbeddingClient implements EmbeddingClient {
         );
 
         if (response == null || response.getEmbedding() == null || response.getEmbedding().getValues() == null) {
-            log.warn("Gemini embedding response is empty");
-            return List.of();
+            throw new IllegalStateException("Gemini embedding response is empty");
+        }
+        if (response.getEmbedding().getValues().isEmpty()) {
+            throw new IllegalStateException("Gemini embedding vector is empty");
         }
         return response.getEmbedding().getValues();
     }
