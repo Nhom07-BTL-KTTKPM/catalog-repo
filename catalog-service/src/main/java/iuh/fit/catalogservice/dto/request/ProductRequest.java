@@ -3,6 +3,7 @@ package iuh.fit.catalogservice.dto.request;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -36,6 +37,12 @@ public class ProductRequest {
     private List<String> suitableSkinTypes;
 
     private List<String> skinConcerns;
+
+    @Valid
+    private List<ProductVariantRequest> variants;
+
+    @Valid
+    private List<ProductImageRequest> images;
 
     @NotNull(message = "Category ID is required")
     private UUID categoryId;

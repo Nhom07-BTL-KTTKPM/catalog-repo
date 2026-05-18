@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 /**
  * Request DTO for creating/updating ProductVariant
@@ -20,9 +19,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class ProductVariantRequest {
-
-    @NotNull(message = "Product ID is required")
-    private UUID productId;
 
     @NotBlank(message = "SKU is required")
     @Size(max = 100, message = "SKU must not exceed 100 characters")
