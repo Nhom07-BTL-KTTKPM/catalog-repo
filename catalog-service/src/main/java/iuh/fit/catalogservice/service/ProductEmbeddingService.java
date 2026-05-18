@@ -46,11 +46,7 @@ public class ProductEmbeddingService {
         if (product == null) {
             return;
         }
-        try {
-            indexProductInternal(product);
-        } catch (Exception ex) {
-            log.warn("Failed to index product embedding for {}", product.getProductId(), ex);
-        }
+        indexProductInternal(product);
     }
 
     @Scheduled(cron = "${embedding.reindex.cron:0 0 * * * *}")

@@ -26,8 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -62,13 +67,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse createProduct(ProductRequest request) {
                 log.info("Creating new product: {}", request.getName());
 
-                if (request.getVariants() == null || request.getVariants().isEmpty()) {
-                        throw new IllegalArgumentException("At least one product variant is required");
-                }
-
-                if (request.getImages() == null || request.getImages().isEmpty()) {
-                        throw new IllegalArgumentException("At least one product image is required");
-                }
+                validateProductRequest(request);
 
                 // Generate slug if not provided
                 String slug = request.getSlug();
@@ -101,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
         applyVariants(product, request.getVariants());
         updatePriceRange(product);
 
-                Product savedProduct = productRepository.save(product);
+                Product savedProduct = productRepository.saveAndFlush(product);
         log.info("Created product with ID: {}", savedProduct.getProductId());
 
                 productEmbeddingService.indexProduct(savedProduct);
@@ -112,6 +111,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse updateProduct(UUID id, ProductRequest request) {
         log.info("Updating product with ID: {}", id);
+
+        validateProductRequest(request);
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + id));
@@ -142,14 +143,38 @@ public class ProductServiceImpl implements ProductService {
         product.setIsFeatured(request.getIsFeatured());
         product.setCategory(category);
         product.setBrand(brand);
+        replaceImages(product, request.getImages());
+        syncVariants(product, request.getVariants());
+        updatePriceRange(product);
 
-                Product updatedProduct = productRepository.save(product);
+                Product updatedProduct = productRepository.saveAndFlush(product);
         log.info("Updated product with ID: {}", updatedProduct.getProductId());
 
                 productEmbeddingService.indexProduct(updatedProduct);
 
         return mapToResponse(updatedProduct);
     }
+
+        private void validateProductRequest(ProductRequest request) {
+                if (request.getVariants() == null || request.getVariants().isEmpty()) {
+                        throw new IllegalArgumentException("At least one product variant is required");
+                }
+
+                if (request.getImages() == null || request.getImages().isEmpty()) {
+                        throw new IllegalArgumentException("At least one product image is required");
+                }
+
+                Set<String> seenSkus = new HashSet<>();
+                for (ProductVariantRequest variant : request.getVariants()) {
+                        String normalizedSku = variant.getSku() == null ? null : variant.getSku().trim().toLowerCase();
+                        if (normalizedSku == null || normalizedSku.isEmpty()) {
+                                continue;
+                        }
+                        if (!seenSkus.add(normalizedSku)) {
+                                throw new IllegalArgumentException("Duplicate variant SKU in request: " + variant.getSku());
+                        }
+                }
+        }
 
         private void applyImages(Product product, List<ProductImageRequest> imageRequests) {
                 if (imageRequests == null || imageRequests.isEmpty()) {
@@ -163,6 +188,16 @@ public class ProductServiceImpl implements ProductService {
                                 .displayOrder(imageRequest.getDisplayOrder())
                                 .isPrimary(Boolean.TRUE.equals(imageRequest.getIsPrimary()))
                                 .build()));
+        }
+
+        private void replaceImages(Product product, List<ProductImageRequest> imageRequests) {
+                Iterator<ProductImage> iterator = product.getImages().iterator();
+                while (iterator.hasNext()) {
+                        ProductImage image = iterator.next();
+                        iterator.remove();
+                        image.setProduct(null);
+                }
+                applyImages(product, imageRequests);
         }
 
         private void applyVariants(Product product, List<ProductVariantRequest> variantRequests) {
@@ -179,6 +214,53 @@ public class ProductServiceImpl implements ProductService {
                                 .imageUrl(variantRequest.getImageUrl())
                                 .isActive(variantRequest.getIsActive())
                                 .build()));
+        }
+
+        private void syncVariants(Product product, List<ProductVariantRequest> variantRequests) {
+                Map<String, ProductVariant> existingVariantsBySku = product.getVariants().stream()
+                                .collect(Collectors.toMap(
+                                                variant -> normalizeSku(variant.getSku()),
+                                                Function.identity()));
+
+                Set<String> requestedSkus = new HashSet<>();
+                for (ProductVariantRequest request : variantRequests) {
+                        String normalizedSku = normalizeSku(request.getSku());
+                        requestedSkus.add(normalizedSku);
+
+                        ProductVariant existingVariant = existingVariantsBySku.get(normalizedSku);
+                        if (existingVariant != null) {
+                                existingVariant.setVariantName(request.getVariantName());
+                                existingVariant.setPrice(request.getPrice());
+                                existingVariant.setOriginalPrice(request.getOriginalPrice());
+                                existingVariant.setStockQuantity(request.getStockQuantity());
+                                existingVariant.setImageUrl(request.getImageUrl());
+                                existingVariant.setIsActive(request.getIsActive());
+                                continue;
+                        }
+
+                        product.addVariant(ProductVariant.builder()
+                                        .sku(request.getSku())
+                                        .variantName(request.getVariantName())
+                                        .price(request.getPrice())
+                                        .originalPrice(request.getOriginalPrice())
+                                        .stockQuantity(request.getStockQuantity())
+                                        .imageUrl(request.getImageUrl())
+                                        .isActive(request.getIsActive())
+                                        .build());
+                }
+
+                Iterator<ProductVariant> iterator = product.getVariants().iterator();
+                while (iterator.hasNext()) {
+                        ProductVariant variant = iterator.next();
+                        if (!requestedSkus.contains(normalizeSku(variant.getSku()))) {
+                                iterator.remove();
+                                variant.setProduct(null);
+                        }
+                }
+        }
+
+        private String normalizeSku(String sku) {
+                return sku == null ? "" : sku.trim().toLowerCase();
         }
 
         private void updatePriceRange(Product product) {
