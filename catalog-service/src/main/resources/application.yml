@@ -56,6 +56,9 @@ embedding:
     enabled: ${EMBEDDING_REINDEX_ENABLED:true}
     cron: ${EMBEDDING_REINDEX_CRON:0 0 * * * *}
     batch-size: ${EMBEDDING_REINDEX_BATCH_SIZE:200}
+    lock:
+      enabled: ${EMBEDDING_REINDEX_LOCK_ENABLED:true}
+      key: ${EMBEDDING_REINDEX_LOCK_KEY:731925}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
