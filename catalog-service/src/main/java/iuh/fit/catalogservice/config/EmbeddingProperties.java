@@ -24,5 +24,13 @@ public class EmbeddingProperties {
         private boolean enabled = true;
         private String cron = "0 0 * * * *";
         private int batchSize = 200;
+        private Lock lock = new Lock();
+    }
+
+    @Getter
+    @Setter
+    public static class Lock {
+        private boolean enabled = true;
+        private long key = 731925;
     }
 }

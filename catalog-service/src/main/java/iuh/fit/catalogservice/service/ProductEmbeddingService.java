@@ -1,9 +1,12 @@
 package iuh.fit.catalogservice.service;
 
+import iuh.fit.catalogservice.config.EmbeddingProperties;
+import iuh.fit.catalogservice.entity.Product;
+import iuh.fit.catalogservice.repo.ProductRepository;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,11 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import iuh.fit.catalogservice.config.EmbeddingProperties;
-import iuh.fit.catalogservice.entity.Product;
-import iuh.fit.catalogservice.repo.ProductRepository;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -25,17 +23,20 @@ public class ProductEmbeddingService {
     private final EmbeddingClient embeddingClient;
     private final ProductEmbeddingStore embeddingStore;
     private final EmbeddingProperties properties;
+    private final EmbeddingReindexLockService lockService;
 
     public ProductEmbeddingService(
             ProductRepository productRepository,
             EmbeddingClient embeddingClient,
             ProductEmbeddingStore embeddingStore,
-            EmbeddingProperties properties
+            EmbeddingProperties properties,
+            EmbeddingReindexLockService lockService
     ) {
         this.productRepository = productRepository;
         this.embeddingClient = embeddingClient;
         this.embeddingStore = embeddingStore;
         this.properties = properties;
+        this.lockService = lockService;
     }
 
     @Transactional
@@ -55,7 +56,11 @@ public class ProductEmbeddingService {
         if (!properties.getReindex().isEnabled()) {
             return;
         }
-        reindexAllProducts();
+        try {
+            reindexAllProducts();
+        } catch (EmbeddingReindexLockedException ex) {
+            log.info("Embedding reindex skipped because a lock is held");
+        }
     }
 
     @Transactional
@@ -64,6 +69,18 @@ public class ProductEmbeddingService {
             return new ReindexResult(0, 0, Instant.now(), Instant.now());
         }
 
+        if (!lockService.tryLock()) {
+            throw new EmbeddingReindexLockedException();
+        }
+
+        try {
+            return doReindex();
+        } finally {
+            lockService.unlock();
+        }
+    }
+
+    private ReindexResult doReindex() {
         int batchSize = properties.getReindex().getBatchSize();
         int pageNumber = 0;
         int processed = 0;
