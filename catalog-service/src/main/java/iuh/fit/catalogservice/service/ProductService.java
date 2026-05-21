@@ -1,6 +1,7 @@
 package iuh.fit.catalogservice.service;
 
 import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -101,5 +102,10 @@ public interface ProductService {
      * Update product price range based on variants
      */
     void updateProductPriceRange(UUID productId);
+
+    /**
+     * Increment total sold for products after an order is delivered.
+     */
+    void incrementTotalSold(java.util.List<ProductSoldUpdateRequest> requests);
 }
 

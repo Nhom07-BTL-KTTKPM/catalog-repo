@@ -3,6 +3,7 @@ package iuh.fit.catalogservice.service.impl;
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductImageRequest;
 import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.response.ProductImageResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
@@ -26,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -369,6 +372,36 @@ public class ProductServiceImpl implements ProductService {
             log.debug("Updated price range for product {}: {} - {}", productId, minPrice, maxPrice);
         }
     }
+
+        @Override
+        public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
+                if (requests == null || requests.isEmpty()) {
+                        return;
+                }
+
+                Map<UUID, Integer> incrementByProductId = new HashMap<>();
+                for (ProductSoldUpdateRequest request : requests) {
+                        if (request == null || request.productId() == null) {
+                                throw new IllegalArgumentException("productId is required");
+                        }
+                        if (request.quantity() == null || request.quantity() <= 0) {
+                                throw new IllegalArgumentException("quantity must be greater than zero");
+                        }
+
+                        incrementByProductId.merge(request.productId(), request.quantity(), Integer::sum);
+                }
+
+                incrementByProductId.forEach((productId, quantity) -> {
+                        Product product = productRepository.findById(productId)
+                                        .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
+
+                        int currentSold = product.getTotalSold() == null ? 0 : product.getTotalSold();
+                        product.setTotalSold(currentSold + quantity);
+                        productRepository.save(product);
+
+                        log.debug("Incremented total sold for product {} by {}. New total: {}", productId, quantity, product.getTotalSold());
+                });
+        }
 
     private ProductResponse mapToResponse(Product product) {
         return ProductResponse.builder()
