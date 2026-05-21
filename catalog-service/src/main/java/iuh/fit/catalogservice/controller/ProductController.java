@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 /**
  * REST Controller for Product management
@@ -167,6 +170,12 @@ public class ProductController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> updateProductPriceRange(@PathVariable UUID id) {
         productService.updateProductPriceRange(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/total-sold/increment")
+    public ResponseEntity<Void> incrementTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
+        productService.incrementTotalSold(requests);
         return ResponseEntity.ok().build();
     }
 }
