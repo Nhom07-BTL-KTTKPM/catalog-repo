@@ -28,7 +28,12 @@ public class InternalSearchController {
             @Valid @RequestBody SemanticSearchRequest request
     ) {
         int topK = request.getTopK() == null ? 5 : request.getTopK();
-        List<SemanticSearchItem> items = semanticSearchService.search(request.getEmbedding(), topK);
+        List<SemanticSearchItem> items = semanticSearchService.search(
+                request.getEmbedding(),
+                topK,
+                request.getMinScore(),
+                request.getQueryText()
+        );
         return ResponseEntity.ok(SemanticSearchResponse.builder().items(items).build());
     }
 }

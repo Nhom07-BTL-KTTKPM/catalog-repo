@@ -125,29 +125,80 @@ public class ProductEmbeddingService {
 
     private String buildEmbeddingText(Product product) {
         List<String> chunks = new ArrayList<>();
-        addIfPresent(chunks, product.getName());
-        addIfPresent(chunks, product.getDescription());
-        addIfPresent(chunks, product.getIngredients());
-        addIfPresent(chunks, product.getUsageInstructions());
+        addLabeled(chunks, "document_type", "catalog_product");
+        addLabeled(chunks, "name", product.getName());
         if (product.getBrand() != null) {
-            addIfPresent(chunks, product.getBrand().getName());
+            addLabeled(chunks, "brand.name", product.getBrand().getName());
         }
         if (product.getCategory() != null) {
-            addIfPresent(chunks, product.getCategory().getName());
+            addLabeled(chunks, "category.name", product.getCategory().getName());
         }
         if (product.getSuitableSkinTypes() != null) {
-            chunks.addAll(product.getSuitableSkinTypes());
+            addJoined(chunks, "suitableSkinTypes", product.getSuitableSkinTypes());
         }
         if (product.getSkinConcerns() != null) {
-            chunks.addAll(product.getSkinConcerns());
+            addJoined(chunks, "skinConcerns", product.getSkinConcerns());
         }
+        addLabeled(chunks, "description", product.getDescription());
+        addLabeled(chunks, "ingredients", product.getIngredients());
+        addLabeled(chunks, "usageInstructions", product.getUsageInstructions());
+        addSearchDocument(chunks, product);
         return String.join("\n", chunks);
+    }
+
+    private void addSearchDocument(List<String> chunks, Product product) {
+        List<String> compact = new ArrayList<>();
+        addIfPresent(compact, product.getName());
+        addIfPresent(compact, product.getName());
+        if (product.getBrand() != null) {
+            addIfPresent(compact, product.getBrand().getName());
+            addIfPresent(compact, product.getBrand().getName());
+        }
+        if (product.getCategory() != null) {
+            addIfPresent(compact, product.getCategory().getName());
+            addIfPresent(compact, product.getCategory().getName());
+        }
+        if (product.getSuitableSkinTypes() != null) {
+            compact.addAll(normalizeValues(product.getSuitableSkinTypes()));
+        }
+        if (product.getSkinConcerns() != null) {
+            compact.addAll(normalizeValues(product.getSkinConcerns()));
+        }
+        addIfPresent(compact, product.getDescription());
+        addIfPresent(compact, product.getIngredients());
+        addIfPresent(compact, product.getUsageInstructions());
+        if (!compact.isEmpty()) {
+            chunks.add("search_document: " + String.join(" | ", compact));
+        }
     }
 
     private void addIfPresent(List<String> chunks, String value) {
         if (StringUtils.hasText(value)) {
             chunks.add(value.trim());
         }
+    }
+
+    private void addLabeled(List<String> chunks, String label, String value) {
+        if (StringUtils.hasText(value)) {
+            chunks.add(label + ": " + value.trim());
+        }
+    }
+
+    private void addJoined(List<String> chunks, String label, List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return;
+        }
+        List<String> normalized = normalizeValues(values);
+        if (!normalized.isEmpty()) {
+            chunks.add(label + ": " + String.join(", ", normalized));
+        }
+    }
+
+    private List<String> normalizeValues(List<String> values) {
+        return values.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .toList();
     }
 
     public record ReindexResult(int processed, int failed, Instant startedAt, Instant finishedAt) {

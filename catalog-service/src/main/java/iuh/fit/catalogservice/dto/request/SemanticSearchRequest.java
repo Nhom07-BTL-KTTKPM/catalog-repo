@@ -24,4 +24,8 @@ public class SemanticSearchRequest {
     @Min(1)
     @Max(50)
     private Integer topK;
+
+    private Double minScore;
+
+    private String queryText;
 }
