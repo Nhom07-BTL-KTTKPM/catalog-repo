@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -25,22 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class SemanticSearchService {
     private static final int RERANK_CANDIDATE_MULTIPLIER = 3;
-    private static final double VECTOR_SCORE_WEIGHT = 0.72d;
-    private static final double LEXICAL_SCORE_WEIGHT = 0.28d;
-    private static final double PRODUCT_TYPE_MATCH_BOOST = 1.8d;
-    private static final double PRODUCT_TYPE_MISMATCH_PENALTY = 1.1d;
-    private static final Map<String, List<String>> PRODUCT_TYPE_ALIASES = Map.of(
-            "serum", List.of("serum", "tinh chat", "essence", "ampoule", "concentrate"),
-            "sunscreen", List.of("sunscreen", "sunblock", "spf", "uv protection", "kem chong nang"),
-            "cleanser", List.of("cleanser", "face wash", "foam cleanser", "sua rua mat"),
-            "moisturizer", List.of("moisturizer", "hydrating cream", "kem duong", "duong am"),
-            "toner", List.of("toner", "balancing toner", "nuoc can bang"),
-            "mask", List.of("mask", "mat na"),
-            "shampoo", List.of("shampoo", "dau goi", "goi dau"),
-            "gel", List.of("gel"),
-            "cream", List.of("cream", "kem"),
-            "makeup", List.of("makeup", "trang diem")
-    );
+    private static final double VECTOR_SCORE_WEIGHT = 0.90d;
+    private static final double LEXICAL_SCORE_WEIGHT = 0.10d;
 
     private final JdbcTemplate jdbcTemplate;
     private final EmbeddingProperties properties;
@@ -65,25 +50,25 @@ public class SemanticSearchService {
         String sql = "SELECT p.product_id, p.name, p.description, p.ingredients, p.usage_instructions, "
             + "c.name AS category_name, b.name AS brand_name, "
             + "p.suitable_skin_types, p.skin_concerns, p.min_price, p.max_price, "
-            + "(1 - (e.embedding <=> ?::vector)) AS score "
+            + weightedScoreSql() + " AS score "
             + "FROM product_embeddings e "
             + "JOIN products p ON p.product_id = e.product_id "
             + "LEFT JOIN categories c ON c.id = p.category_id "
             + "LEFT JOIN brands b ON b.id = p.brand_id "
             + "WHERE p.is_active = true "
             + "AND e.embedding IS NOT NULL "
-            + "AND (1 - (e.embedding <=> ?::vector)) >= ? "
-            + "ORDER BY e.embedding <=> ?::vector "
+            + "AND " + weightedScoreSql() + " >= ? "
+            + "ORDER BY score DESC "
             + "LIMIT ?";
 
         List<SemanticSearchItem> rawItems = jdbcTemplate.query(
                 sql,
                 ps -> {
-                    ps.setObject(1, pgVector);
-                    ps.setObject(2, pgVector);
-                    ps.setDouble(3, minScore);
-                    ps.setObject(4, pgVector);
-                    ps.setInt(5, candidateTopK);
+                    for (int i = 1; i <= 10; i++) {
+                        ps.setObject(i, pgVector);
+                    }
+                    ps.setDouble(11, minScore);
+                    ps.setInt(12, candidateTopK);
                 },
                 this::mapRow
         );
@@ -166,20 +151,7 @@ public class SemanticSearchService {
         if (containsPhrase(normalizedQuery, item.getCategoryName())) {
             score += 1.0d;
         }
-        score += productTypeConsistencyScore(item, normalizedQuery);
         return score;
-    }
-
-    private double productTypeConsistencyScore(SemanticSearchItem item, String normalizedQuery) {
-        String requestedType = extractCanonicalProductType(normalizedQuery);
-        if (requestedType == null) {
-            return 0.0d;
-        }
-        Set<String> itemTypes = detectItemProductTypes(item);
-        if (itemTypes.contains(requestedType)) {
-            return PRODUCT_TYPE_MATCH_BOOST;
-        }
-        return itemTypes.isEmpty() ? 0.0d : -PRODUCT_TYPE_MISMATCH_PENALTY;
     }
 
     private double overlapScore(Set<String> queryTokens, String fieldText) {
@@ -216,40 +188,14 @@ public class SemanticSearchService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private String extractCanonicalProductType(String normalizedQuery) {
-        if (!StringUtils.hasText(normalizedQuery)) {
-            return null;
-        }
-        String bestType = null;
-        int bestAliasLength = 0;
-        for (Map.Entry<String, List<String>> entry : PRODUCT_TYPE_ALIASES.entrySet()) {
-            for (String alias : entry.getValue()) {
-                if (!alias.isBlank() && normalizedQuery.contains(alias) && alias.length() > bestAliasLength) {
-                    bestType = entry.getKey();
-                    bestAliasLength = alias.length();
-                }
-            }
-        }
-        return bestType;
-    }
-
-    private Set<String> detectItemProductTypes(SemanticSearchItem item) {
-        String searchableText = String.join(" ",
-                normalize(item.getCategoryName()),
-                normalize(item.getName()),
-                normalize(item.getDescription()),
-                normalize(item.getUsageInstructions())
-        );
-        Set<String> detected = new LinkedHashSet<>();
-        for (Map.Entry<String, List<String>> entry : PRODUCT_TYPE_ALIASES.entrySet()) {
-            for (String alias : entry.getValue()) {
-                if (!alias.isBlank() && searchableText.contains(alias)) {
-                    detected.add(entry.getKey());
-                    break;
-                }
-            }
-        }
-        return detected;
+    private String weightedScoreSql() {
+        return "GREATEST("
+                + "1 - (COALESCE(e.identity_embedding, e.embedding) <=> ?::vector), "
+                + "1 - (COALESCE(e.benefit_embedding, e.embedding) <=> ?::vector), "
+                + "1 - (COALESCE(e.ingredient_embedding, e.embedding) <=> ?::vector), "
+                + "1 - (COALESCE(e.usage_embedding, e.embedding) <=> ?::vector), "
+                + "1 - (e.embedding <=> ?::vector)"
+                + ")";
     }
 
     private String normalize(String text) {
