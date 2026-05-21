@@ -114,36 +114,68 @@ public class ProductEmbeddingService {
             return;
         }
 
-        String text = buildEmbeddingText(product);
-        if (!StringUtils.hasText(text)) {
+        ProductEmbeddingTexts texts = buildEmbeddingTexts(product);
+        if (!StringUtils.hasText(texts.fullText())) {
             return;
         }
 
-        List<Double> embedding = embeddingClient.embed(text);
-        embeddingStore.upsert(product.getProductId(), embedding);
+        ProductEmbeddingStore.EmbeddingVectors vectors = new ProductEmbeddingStore.EmbeddingVectors(
+                embeddingClient.embed(texts.fullText()),
+                embedOptional(texts.identityText()),
+                embedOptional(texts.benefitText()),
+                embedOptional(texts.ingredientText()),
+                embedOptional(texts.usageText())
+        );
+        embeddingStore.upsert(product.getProductId(), vectors);
     }
 
-    private String buildEmbeddingText(Product product) {
-        List<String> chunks = new ArrayList<>();
-        addLabeled(chunks, "document_type", "catalog_product");
-        addLabeled(chunks, "name", product.getName());
+    private List<Double> embedOptional(String text) {
+        if (!StringUtils.hasText(text)) {
+            return List.of();
+        }
+        return embeddingClient.embed(text);
+    }
+
+    private ProductEmbeddingTexts buildEmbeddingTexts(Product product) {
+        List<String> identityChunks = new ArrayList<>();
+        addLabeled(identityChunks, "document_type", "catalog_product");
+        addLabeled(identityChunks, "name", product.getName());
         if (product.getBrand() != null) {
-            addLabeled(chunks, "brand.name", product.getBrand().getName());
+            addLabeled(identityChunks, "brand.name", product.getBrand().getName());
         }
         if (product.getCategory() != null) {
-            addLabeled(chunks, "category.name", product.getCategory().getName());
+            addLabeled(identityChunks, "category.name", product.getCategory().getName());
         }
+
+        List<String> benefitChunks = new ArrayList<>();
         if (product.getSuitableSkinTypes() != null) {
-            addJoined(chunks, "suitableSkinTypes", product.getSuitableSkinTypes());
+            addJoined(benefitChunks, "suitableSkinTypes", product.getSuitableSkinTypes());
         }
         if (product.getSkinConcerns() != null) {
-            addJoined(chunks, "skinConcerns", product.getSkinConcerns());
+            addJoined(benefitChunks, "skinConcerns", product.getSkinConcerns());
         }
-        addLabeled(chunks, "description", product.getDescription());
-        addLabeled(chunks, "ingredients", product.getIngredients());
-        addLabeled(chunks, "usageInstructions", product.getUsageInstructions());
-        addSearchDocument(chunks, product);
-        return String.join("\n", chunks);
+        addLabeled(benefitChunks, "description", product.getDescription());
+
+        List<String> ingredientChunks = new ArrayList<>();
+        addLabeled(ingredientChunks, "ingredients", product.getIngredients());
+
+        List<String> usageChunks = new ArrayList<>();
+        addLabeled(usageChunks, "usageInstructions", product.getUsageInstructions());
+
+        List<String> fullChunks = new ArrayList<>();
+        fullChunks.addAll(identityChunks);
+        fullChunks.addAll(benefitChunks);
+        fullChunks.addAll(ingredientChunks);
+        fullChunks.addAll(usageChunks);
+        addSearchDocument(fullChunks, product);
+
+        return new ProductEmbeddingTexts(
+                String.join("\n", fullChunks),
+                String.join("\n", identityChunks),
+                String.join("\n", benefitChunks),
+                String.join("\n", ingredientChunks),
+                String.join("\n", usageChunks)
+        );
     }
 
     private void addSearchDocument(List<String> chunks, Product product) {
@@ -202,5 +234,14 @@ public class ProductEmbeddingService {
     }
 
     public record ReindexResult(int processed, int failed, Instant startedAt, Instant finishedAt) {
+    }
+
+    private record ProductEmbeddingTexts(
+            String fullText,
+            String identityText,
+            String benefitText,
+            String ingredientText,
+            String usageText
+    ) {
     }
 }
