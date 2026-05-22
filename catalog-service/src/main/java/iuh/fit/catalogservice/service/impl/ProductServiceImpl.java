@@ -1,30 +1,5 @@
 package iuh.fit.catalogservice.service.impl;
 
-import iuh.fit.catalogservice.dto.request.ProductRequest;
-import iuh.fit.catalogservice.dto.request.ProductImageRequest;
-import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
-import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
-import iuh.fit.catalogservice.dto.response.ProductImageResponse;
-import iuh.fit.catalogservice.dto.response.ProductResponse;
-import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
-import iuh.fit.catalogservice.entity.Brand;
-import iuh.fit.catalogservice.entity.Category;
-import iuh.fit.catalogservice.entity.ProductImage;
-import iuh.fit.catalogservice.entity.Product;
-import iuh.fit.catalogservice.entity.ProductVariant;
-import iuh.fit.catalogservice.repo.BrandRepository;
-import iuh.fit.catalogservice.repo.CategoryRepository;
-import iuh.fit.catalogservice.repo.ProductRepository;
-import iuh.fit.catalogservice.repo.ProductVariantRepository;
-import iuh.fit.catalogservice.service.ProductEmbeddingService;
-import iuh.fit.catalogservice.service.ProductService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,6 +11,33 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import iuh.fit.catalogservice.dto.request.ProductImageRequest;
+import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
+import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
+import iuh.fit.catalogservice.dto.response.ProductImageResponse;
+import iuh.fit.catalogservice.dto.response.ProductResponse;
+import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
+import iuh.fit.catalogservice.entity.Brand;
+import iuh.fit.catalogservice.entity.Category;
+import iuh.fit.catalogservice.entity.Product;
+import iuh.fit.catalogservice.entity.ProductImage;
+import iuh.fit.catalogservice.entity.ProductVariant;
+import iuh.fit.catalogservice.repo.BrandRepository;
+import iuh.fit.catalogservice.repo.CategoryRepository;
+import iuh.fit.catalogservice.repo.ProductRepository;
+import iuh.fit.catalogservice.repo.ProductVariantRepository;
+import iuh.fit.catalogservice.service.ProductEmbeddingService;
+import iuh.fit.catalogservice.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of ProductService
@@ -156,6 +158,23 @@ public class ProductServiceImpl implements ProductService {
 
         return mapToResponse(updatedProduct);
     }
+
+        @Override
+        public ProductResponse updateProductIsActive(UUID id, ProductStatusRequest request) {
+                log.info("Updating product isActive status with ID: {}", id);
+
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + id));
+
+                product.setIsActive(request.getIsActive());
+
+                Product updatedProduct = productRepository.save(product);
+                log.info("Updated product isActive status with ID: {}", updatedProduct.getProductId());
+
+                productEmbeddingService.indexProduct(updatedProduct);
+
+                return mapToResponse(updatedProduct);
+        }
 
         private void validateProductRequest(ProductRequest request) {
                 if (request.getVariants() == null || request.getVariants().isEmpty()) {
@@ -476,8 +495,8 @@ public class ProductServiceImpl implements ProductService {
                         Product product = productRepository.findById(productId)
                                         .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
 
-                        int currentSold = product.getTotalSold() == null ? 0 : product.getTotalSold();
-                        product.setTotalSold(currentSold + quantity);
+                        Integer currentSold = product.getTotalSold();
+                        product.setTotalSold((currentSold == null ? 0 : currentSold) + quantity);
                         productRepository.save(product);
 
                         log.debug("Incremented total sold for product {} by {}. New total: {}", productId, quantity, product.getTotalSold());
