@@ -1,12 +1,14 @@
 package iuh.fit.catalogservice.service;
 
-import iuh.fit.catalogservice.dto.request.ProductRequest;
-import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
-import iuh.fit.catalogservice.dto.response.ProductResponse;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
+import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
+import iuh.fit.catalogservice.dto.response.ProductResponse;
 
 /**
  * Service interface for Product operations
@@ -22,6 +24,11 @@ public interface ProductService {
      * Update an existing product
      */
     ProductResponse updateProduct(UUID id, ProductRequest request);
+
+    /**
+     * Update product active status.
+     */
+    ProductResponse updateProductIsActive(UUID id, ProductStatusRequest request);
 
     /**
      * Get product by ID

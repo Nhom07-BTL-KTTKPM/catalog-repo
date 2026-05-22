@@ -1,5 +1,6 @@
 package iuh.fit.catalogservice.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,12 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 /**
  * REST Controller for Product management
@@ -50,6 +51,15 @@ public class ProductController {
             @PathVariable UUID id,
             @Valid @RequestBody ProductRequest request) {
         ProductResponse response = productService.updateProduct(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductResponse> updateProductIsActive(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductStatusRequest request) {
+        ProductResponse response = productService.updateProductIsActive(id, request);
         return ResponseEntity.ok(response);
     }
 
