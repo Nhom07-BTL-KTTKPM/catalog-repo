@@ -1,5 +1,7 @@
 package iuh.fit.catalogservice.dto.request;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -7,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 /**
  * Request DTO for creating/updating Category
@@ -32,8 +32,6 @@ public class CategoryRequest {
     private String imageUrl;
 
     private UUID parentId;
-
-    private Integer displayOrder;
 
     @NotNull(message = "isActive field is required")
     @Builder.Default

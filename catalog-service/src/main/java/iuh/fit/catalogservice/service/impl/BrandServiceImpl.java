@@ -1,6 +1,16 @@
 package iuh.fit.catalogservice.service.impl;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import iuh.fit.catalogservice.dto.request.BrandRequest;
+import iuh.fit.catalogservice.dto.request.BrandStatusRequest;
 import iuh.fit.catalogservice.dto.response.BrandResponse;
 import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
 import iuh.fit.catalogservice.entity.Brand;
@@ -8,14 +18,6 @@ import iuh.fit.catalogservice.repo.BrandRepository;
 import iuh.fit.catalogservice.service.BrandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of BrandService
@@ -121,15 +123,18 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public void deleteBrand(UUID id) {
-        log.info("Deleting brand with ID: {}", id);
+    public BrandResponse updateBrandIsActive(UUID id, BrandStatusRequest request) {
+        log.info("Updating brand isActive status with ID: {}", id);
 
-        if (!brandRepository.existsById(id)) {
-            throw new IllegalArgumentException("Brand not found with ID: " + id);
-        }
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found with ID: " + id));
 
-        brandRepository.deleteById(id);
-        log.info("Deleted brand with ID: {}", id);
+        brand.setIsActive(request.getIsActive());
+
+        Brand updatedBrand = brandRepository.save(brand);
+        log.info("Updated brand isActive status with ID: {}", updatedBrand.getId());
+
+        return mapToResponse(updatedBrand);
     }
 
     @Override

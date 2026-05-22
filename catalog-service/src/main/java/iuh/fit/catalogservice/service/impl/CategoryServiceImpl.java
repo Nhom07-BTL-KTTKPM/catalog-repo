@@ -1,6 +1,7 @@
 package iuh.fit.catalogservice.service.impl;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
+import iuh.fit.catalogservice.dto.request.CategoryStatusRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
 import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import iuh.fit.catalogservice.entity.Category;
@@ -42,7 +43,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(request.getDescription())
                 .imageUrl(request.getImageUrl())
                 .parentId(request.getParentId())
-                .displayOrder(request.getDisplayOrder())
                 .isActive(request.getIsActive())
                 .build();
 
@@ -70,7 +70,6 @@ public class CategoryServiceImpl implements CategoryService {
         category.setDescription(request.getDescription());
         category.setImageUrl(request.getImageUrl());
         category.setParentId(request.getParentId());
-        category.setDisplayOrder(request.getDisplayOrder());
         category.setIsActive(request.getIsActive());
 
         Category updatedCategory = categoryRepository.save(category);
@@ -115,7 +114,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getActiveCategories() {
         log.debug("Fetching all active categories");
         
-        return categoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc()
+        return categoryRepository.findByIsActiveTrueOrderByNameAsc()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -126,7 +125,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getRootCategories() {
         log.debug("Fetching root categories");
         
-        return categoryRepository.findByParentIdIsNullAndIsActiveTrueOrderByDisplayOrderAsc()
+        return categoryRepository.findByParentIdIsNullAndIsActiveTrueOrderByNameAsc()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -137,22 +136,25 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getChildCategories(UUID parentId) {
         log.debug("Fetching child categories for parent ID: {}", parentId);
         
-        return categoryRepository.findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc(parentId)
+        return categoryRepository.findByParentIdAndIsActiveTrueOrderByNameAsc(parentId)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteCategory(UUID id) {
-        log.info("Deleting category with ID: {}", id);
-        
-        if (!categoryRepository.existsById(id)) {
-            throw new IllegalArgumentException("Category not found with ID: " + id);
-        }
+    public CategoryResponse updateCategoryIsActive(UUID id, CategoryStatusRequest request) {
+        log.info("Updating category isActive status with ID: {}", id);
 
-        categoryRepository.deleteById(id);
-        log.info("Deleted category with ID: {}", id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+
+        category.setIsActive(request.getIsActive());
+
+        Category updatedCategory = categoryRepository.save(category);
+        log.info("Updated category isActive status with ID: {}", updatedCategory.getId());
+
+        return mapToResponse(updatedCategory);
     }
 
     @Override
@@ -188,7 +190,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(category.getDescription())
                 .imageUrl(category.getImageUrl())
                 .parentId(category.getParentId())
-                .displayOrder(category.getDisplayOrder())
                 .isActive(category.getIsActive())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
