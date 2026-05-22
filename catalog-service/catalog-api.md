@@ -377,13 +377,18 @@ Ví dụ reponse:
 - Body: `BrandStatusRequest`
 - Success: `200 OK` với `BrandResponse`
 - Ý nghĩa: chỉ cập nhật `isActive` để ẩn/hiện brand, không xóa dữ liệu khỏi database.
-
+Ví dụ request:
+```json
+{
+  "isActive": false
+}
+```
 ### 4.8 Tìm kiếm Brand
 
 - Method: `GET`
 - URL: `/api/v1/catalog/brands/search?keyword={keyword}`
 - Public — trả `List<BrandResponse>`
-
+vd: ?keyword=e
 ### 4.9 Lấy brand theo country
 
 - Method: `GET`

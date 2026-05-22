@@ -53,12 +53,7 @@ public class BrandController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BrandResponse> getBrandById(@PathVariable UUID id) {
-        BrandResponse response = brandService.getBrandById(id);
-        return ResponseEntity.ok(response);
-    }
-
+    
     @GetMapping("/slug/{slug}")
     public ResponseEntity<BrandResponse> getBrandBySlug(@PathVariable String slug) {
         BrandResponse response = brandService.getBrandBySlug(slug);
@@ -108,5 +103,11 @@ public class BrandController {
         List<BrandResponse> response = brandService.getBrandsByOriginCountry(country);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<BrandResponse> getBrandById(@PathVariable UUID id) {
+        BrandResponse response = brandService.getBrandById(id);
+        return ResponseEntity.ok(response);
+    }
+
 }
 
