@@ -454,7 +454,72 @@ Ví dụ reponse:
 - URL: `/api/v1/catalog/categories`
 - Query params: `page` (0), `size` (20), `sort`
 - Success: `200 OK` với `Page<CategoryResponse>`
-
+vd: /categories?page=1&size=2&sort=name,asc
+vd trang 1: /api/v1/catalog/categories?page=0&size=2&sort=name,asc
+Ví dụ reponse:
+```json
+{
+    "content": [
+        {
+            "id": "96edc611-d7fe-4477-ac9c-39a44ad42c19",
+            "name": "Chăm sóc da",
+            "slug": "skincare",
+            "description": "Các sản phẩm chăm sóc da mặt và cơ thể",
+            "imageUrl": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400",
+            "parentId": null,
+            "isActive": true,
+            "createdAt": "2026-05-22T13:10:43.703598",
+            "updatedAt": "2026-05-22T13:10:43.703598"
+        },
+        {
+            "id": "55bf5884-106f-4214-aabe-5d71c3cc1e3c",
+            "name": "Haircare",
+            "slug": "haircare",
+            "description": "Sản phẩm chăm sóc tóc",
+            "imageUrl": "https://as2.ftcdn.net/v2/jpg/07/25/02/03/1000_F_725020314_zGtQmiZhaD0MDGduey4bORSOcOzWYbyY.jpg",
+            "parentId": null,
+            "isActive": true,
+            "createdAt": "2026-05-22T13:30:55.635559",
+            "updatedAt": "2026-05-22T13:30:55.635559"
+        }
+    ],
+    "empty": false,
+    "first": true,
+    "last": false,
+    "number": 0,
+    "numberOfElements": 2,
+    "pageable": {
+        "offset": 0,
+        "pageNumber": 0,
+        "pageSize": 2,
+        "paged": true,
+        "sort": [
+            {
+                "ascending": true,
+                "descending": false,
+                "direction": "ASC",
+                "ignoreCase": false,
+                "nullHandling": "NATIVE",
+                "property": "name"
+            }
+        ],
+        "unpaged": false
+    },
+    "size": 2,
+    "sort": [
+        {
+            "ascending": true,
+            "descending": false,
+            "direction": "ASC",
+            "ignoreCase": false,
+            "nullHandling": "NATIVE",
+            "property": "name"
+        }
+    ],
+    "totalElements": 5,
+    "totalPages": 3
+}
+```
 ### 5.6 Lấy danh sách active
 
 - Method: `GET`
@@ -484,13 +549,18 @@ Ví dụ reponse:
 - URL: `/api/v1/catalog/categories/children/{parentId}`
 - Public — `List<CategoryResponse>`
 
-### 5.11 Xóa Category
+### 5.11 Ẩn Category
 
-- Method: `DELETE`
-- URL: `/api/v1/catalog/categories/{id}`
+- Method: `PATCH`
+- URL: `/api/v1/catalog/categories/{id}/status`
 - Roles: `ROLE_ADMIN`
 - Success: `204 No Content`
-
+vd request
+```json
+{
+    "isActive": false
+}
+```
 ### 5.12 Tìm kiếm Category
 
 - Method: `GET`

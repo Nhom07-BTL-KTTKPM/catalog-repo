@@ -1,6 +1,7 @@
 package iuh.fit.catalogservice.service.impl;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
+import iuh.fit.catalogservice.dto.request.CategoryStatusRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
 import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import iuh.fit.catalogservice.entity.Category;
@@ -142,15 +143,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteCategory(UUID id) {
-        log.info("Deleting category with ID: {}", id);
-        
-        if (!categoryRepository.existsById(id)) {
-            throw new IllegalArgumentException("Category not found with ID: " + id);
-        }
+    public CategoryResponse updateCategoryIsActive(UUID id, CategoryStatusRequest request) {
+        log.info("Updating category isActive status with ID: {}", id);
 
-        categoryRepository.deleteById(id);
-        log.info("Deleted category with ID: {}", id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+
+        category.setIsActive(request.getIsActive());
+
+        Category updatedCategory = categoryRepository.save(category);
+        log.info("Updated category isActive status with ID: {}", updatedCategory.getId());
+
+        return mapToResponse(updatedCategory);
     }
 
     @Override

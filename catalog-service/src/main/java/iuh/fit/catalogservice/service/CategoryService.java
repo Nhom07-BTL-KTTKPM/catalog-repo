@@ -1,6 +1,7 @@
 package iuh.fit.catalogservice.service;
 
 import iuh.fit.catalogservice.dto.request.CategoryRequest;
+import iuh.fit.catalogservice.dto.request.CategoryStatusRequest;
 import iuh.fit.catalogservice.dto.response.CategoryResponse;
 import iuh.fit.catalogservice.dto.response.CategorySummaryResponse;
 import org.springframework.data.domain.Page;
@@ -55,9 +56,9 @@ public interface CategoryService {
     List<CategoryResponse> getChildCategories(UUID parentId);
 
     /**
-     * Delete category
+     * Update category active status
      */
-    void deleteCategory(UUID id);
+    CategoryResponse updateCategoryIsActive(UUID id, CategoryStatusRequest request);
 
     /**
      * Search categories by name
