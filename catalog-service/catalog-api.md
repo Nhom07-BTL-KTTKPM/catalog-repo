@@ -101,7 +101,6 @@ Các DTO chính được sử dụng trong controller đã đọc từ source. B
 | `description` | string | Không | - | Mô tả |
 | `imageUrl` | string | Không | - | Ảnh đại diện |
 | `parentId` | UUID | Không | - | Id danh mục cha |
-| `displayOrder` | int | Không | - | Thứ tự hiển thị |
 | `isActive` | boolean | Có | not null | Trạng thái |
 
 ### 3.5 `CategoryResponse` (Response)
@@ -114,7 +113,6 @@ Các DTO chính được sử dụng trong controller đã đọc từ source. B
 | `description` | string | Mô tả |
 | `imageUrl` | string | Ảnh |
 | `parentId` | UUID | Id cha |
-| `displayOrder` | int | Thứ tự |
 | `isActive` | boolean | Trạng thái |
 | `createdAt` | datetime | Thời điểm tạo |
 | `updatedAt` | datetime | Thời điểm cập nhật |
@@ -389,11 +387,6 @@ Ví dụ request:
 - URL: `/api/v1/catalog/brands/search?keyword={keyword}`
 - Public — trả `List<BrandResponse>`
 vd: ?keyword=e
-### 4.9 Lấy brand theo country
-
-- Method: `GET`
-- URL: `/api/v1/catalog/brands/country/{country}`
-- Public — trả `List<BrandResponse>`
 
 ---
 
@@ -413,16 +406,29 @@ Ví dụ request:
 
 ```json
 {
-	"name": "Skincare",
-	"slug": "skincare",
-	"description": "Sản phẩm chăm sóc da",
-	"imageUrl": "https://cdn.example.com/categories/skincare.png",
+	"name": "Haircare",
+	"slug": "haircare",
+	"description": "Sản phẩm chăm sóc tóc",
+	"imageUrl": "https://cdn.example.com/categories/haircare.png",
 	"parentId": null,
-	"displayOrder": 1,
 	"isActive": true
 }
 ```
+Ví dụ reponse:
 
+```json
+{
+    "id": "7a147f72-70fe-4b90-8d3d-842a392245a5",
+    "name": "Haircare",
+    "slug": "haircare",
+    "description": "Sản phẩm chăm sóc tóc",
+    "imageUrl": "https://as2.ftcdn.net/v2/jpg/07/25/02/03/1000_F_725020314_zGtQmiZhaD0MDGduey4bORSOcOzWYbyY.jpg",
+    "parentId": null,
+    "isActive": true,
+    "createdAt": null,
+    "updatedAt": null
+}
+```
 ### 5.2 Cập nhật Category
 
 - Method: `PUT`

@@ -1,12 +1,23 @@
 package iuh.fit.catalogservice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Category entity - hierarchical product categorization
@@ -60,12 +71,6 @@ public class Category {
      */
     @Column(name = "parent_id")
     private UUID parentId;
-
-    /**
-     * Thứ tự hiển thị trên giao diện người dùng (Thấp đứng trước).
-     */
-    @Column(name = "display_order")
-    private Integer displayOrder;
 
     /**
      * Trạng thái hoạt động của danh mục.
