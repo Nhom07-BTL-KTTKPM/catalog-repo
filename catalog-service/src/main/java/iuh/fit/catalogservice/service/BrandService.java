@@ -1,13 +1,15 @@
 package iuh.fit.catalogservice.service;
 
-import iuh.fit.catalogservice.dto.request.BrandRequest;
-import iuh.fit.catalogservice.dto.response.BrandResponse;
-import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.UUID;
+import iuh.fit.catalogservice.dto.request.BrandRequest;
+import iuh.fit.catalogservice.dto.request.BrandStatusRequest;
+import iuh.fit.catalogservice.dto.response.BrandResponse;
+import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
 
 /**
  * Service interface for Brand operations
@@ -45,9 +47,9 @@ public interface BrandService {
     List<BrandResponse> getActiveBrands();
 
     /**
-     * Delete brand
+      * Update brand active status
      */
-    void deleteBrand(UUID id);
+     BrandResponse updateBrandIsActive(UUID id, BrandStatusRequest request);
 
     /**
      * Search brands by name

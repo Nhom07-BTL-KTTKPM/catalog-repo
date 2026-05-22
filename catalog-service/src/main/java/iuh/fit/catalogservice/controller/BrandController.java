@@ -1,21 +1,31 @@
 package iuh.fit.catalogservice.controller;
 
-import iuh.fit.catalogservice.dto.request.BrandRequest;
-import iuh.fit.catalogservice.dto.response.BrandResponse;
-import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
-import iuh.fit.catalogservice.service.BrandService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.UUID;
+import iuh.fit.catalogservice.dto.request.BrandRequest;
+import iuh.fit.catalogservice.dto.request.BrandStatusRequest;
+import iuh.fit.catalogservice.dto.response.BrandResponse;
+import iuh.fit.catalogservice.dto.response.BrandSummaryResponse;
+import iuh.fit.catalogservice.service.BrandService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 /**
  * REST Controller for Brand management
@@ -78,11 +88,13 @@ public class BrandController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteBrand(@PathVariable UUID id) {
-        brandService.deleteBrand(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<BrandResponse> updateBrandIsActive(
+            @PathVariable UUID id,
+            @Valid @RequestBody BrandStatusRequest request) {
+        BrandResponse response = brandService.updateBrandIsActive(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")
