@@ -38,7 +38,6 @@ import iuh.fit.catalogservice.service.ProductEmbeddingService;
 import iuh.fit.catalogservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 /**
  * Implementation of ProductService
  */
@@ -111,6 +110,8 @@ public class ProductServiceImpl implements ProductService {
 
         return mapToResponse(savedProduct);
     }
+
+        
 
     @Override
     public ProductResponse updateProduct(UUID id, ProductRequest request) {
@@ -481,35 +482,46 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-        @Override
-        public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
-                if (requests == null || requests.isEmpty()) {
-                        return;
-                }
-
-                Map<UUID, Integer> incrementByProductId = new HashMap<>();
-                for (ProductSoldUpdateRequest request : requests) {
-                        if (request == null || request.productId() == null) {
-                                throw new IllegalArgumentException("productId is required");
-                        }
-                        if (request.quantity() == null || request.quantity() <= 0) {
-                                throw new IllegalArgumentException("quantity must be greater than zero");
-                        }
-
-                        incrementByProductId.merge(request.productId(), request.quantity(), Integer::sum);
-                }
-
-                incrementByProductId.forEach((productId, quantity) -> {
-                        Product product = productRepository.findById(productId)
-                                        .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
-
-                        Integer currentSold = product.getTotalSold();
-                        product.setTotalSold((currentSold == null ? 0 : currentSold) + quantity);
-                        productRepository.save(product);
-
-                        log.debug("Incremented total sold for product {} by {}. New total: {}", productId, quantity, product.getTotalSold());
-                });
+@Override
+public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+                return;
         }
+
+        // 1. Grouping và Strict Validation (Lấy từ code 2)
+        Map<UUID, Integer> incrementByProductId = new HashMap<>();
+        for (ProductSoldUpdateRequest request : requests) {
+                if (request == null || request.productId() == null) {
+                        throw new IllegalArgumentException("productId is required");
+                }
+                if (request.quantity() == null || request.quantity() <= 0) {
+                        throw new IllegalArgumentException("quantity must be greater than zero");
+                }
+                incrementByProductId.merge(request.productId(), request.quantity(), Integer::sum);
+        }
+
+        // 2. Fetch data hàng loạt (Lấy từ code 1)
+        List<Product> products = productRepository.findAllById(incrementByProductId.keySet());
+
+        // Kiểm tra xem có Product ID nào truyền vào mà không tồn tại trong DB không
+        if (products.size() < incrementByProductId.size()) {
+                throw new IllegalArgumentException("One or more products were not found in the database.");
+        }
+
+        // 3. Cập nhật data và ghi log 
+        for (Product product : products) {
+                Integer quantityToAdd = incrementByProductId.get(product.getProductId());
+                Integer currentSold = product.getTotalSold();
+                
+                product.setTotalSold((currentSold == null ? 0 : currentSold) + quantityToAdd);
+                
+                log.debug("Incremented total sold for product {} by {}. New total: {}", 
+                          product.getProductId(), quantityToAdd, product.getTotalSold());
+        }
+
+        // 4. Save hàng loạt (Lấy từ code 1)
+        productRepository.saveAll(products);
+}
 
     private ProductResponse mapToResponse(Product product) {
         return ProductResponse.builder()
@@ -574,4 +586,3 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 }
-

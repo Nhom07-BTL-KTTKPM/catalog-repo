@@ -7,3 +7,5 @@ public record ProductSoldUpdateRequest(
         Integer quantity
 ) {
 }
+
+

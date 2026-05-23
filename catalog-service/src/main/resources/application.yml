@@ -43,7 +43,7 @@ auth:
 internal:
   api:
     header-name: ${CATALOG_INTERNAL_API_HEADER_NAME:X-Internal-Api-Key}
-    key: ${CATALOG_INTERNAL_API_KEY}
+    key: ${CATALOG_INTERNAL_API_KEY:change-me-in-prod}
 
 embedding:
   enabled: ${EMBEDDING_ENABLED:true}
