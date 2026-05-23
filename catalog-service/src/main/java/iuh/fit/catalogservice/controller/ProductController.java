@@ -1,15 +1,18 @@
 package iuh.fit.catalogservice.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,9 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
-
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -52,7 +55,16 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductResponse> updateProductIsActive(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductStatusRequest request) {
+        ProductResponse response = productService.updateProductIsActive(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable UUID id) {
         ProductResponse response = productService.getProductById(id);
         return ResponseEntity.ok(response);
@@ -68,6 +80,14 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponse>> getAllActiveProducts(
             @PageableDefault(size = 20) Pageable pageable) {
         Page<ProductResponse> response = productService.getAllActiveProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<Page<ProductResponse>> getAllProductsForAdmin(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ProductResponse> response = productService.getAllProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -158,22 +178,22 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:[0-9a-fA-F\\\\-]{36}}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/update-price-range")
+    @PostMapping("/{id:[0-9a-fA-F\\\\-]{36}}/update-price-range")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> updateProductPriceRange(@PathVariable UUID id) {
         productService.updateProductPriceRange(id);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/total-sold/increment")
-    public ResponseEntity<Void> incrementProductTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
+@PostMapping("/total-sold/increment")
+    public ResponseEntity<Void> incrementTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
         productService.incrementTotalSold(requests);
         return ResponseEntity.ok().build();
     }

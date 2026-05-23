@@ -19,9 +19,41 @@ public class ProductEmbeddingStore {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void upsert(UUID productId, List<Double> embedding) {
-        if (embedding == null || embedding.isEmpty()) {
+    public void upsert(UUID productId, EmbeddingVectors vectors) {
+        if (vectors == null || vectors.embedding() == null || vectors.embedding().isEmpty()) {
             return;
+        }
+
+        String sql = "INSERT INTO product_embeddings ("
+                + "product_id, embedding, identity_embedding, benefit_embedding, ingredient_embedding, usage_embedding, updated_at"
+                + ") VALUES (?, ?::vector, ?::vector, ?::vector, ?::vector, ?::vector, NOW()) "
+                + "ON CONFLICT (product_id) "
+                + "DO UPDATE SET "
+                + "embedding = EXCLUDED.embedding, "
+                + "identity_embedding = EXCLUDED.identity_embedding, "
+                + "benefit_embedding = EXCLUDED.benefit_embedding, "
+                + "ingredient_embedding = EXCLUDED.ingredient_embedding, "
+                + "usage_embedding = EXCLUDED.usage_embedding, "
+                + "updated_at = NOW()";
+
+        jdbcTemplate.update(
+                sql,
+                productId,
+                toPgVector(vectors.embedding()),
+                toPgVector(vectors.identityEmbedding()),
+                toPgVector(vectors.benefitEmbedding()),
+                toPgVector(vectors.ingredientEmbedding()),
+                toPgVector(vectors.usageEmbedding())
+        );
+    }
+
+    public void delete(UUID productId) {
+        jdbcTemplate.update("DELETE FROM product_embeddings WHERE product_id = ?", productId);
+    }
+
+    private PGobject toPgVector(List<Double> embedding) {
+        if (embedding == null || embedding.isEmpty()) {
+            return null;
         }
         String vectorLiteral = embedding.stream()
                 .map(value -> String.format(Locale.ROOT, "%s", value))
@@ -34,16 +66,15 @@ public class ProductEmbeddingStore {
         } catch (SQLException ex) {
             throw new IllegalArgumentException("Invalid embedding vector format", ex);
         }
-
-        String sql = "INSERT INTO product_embeddings (product_id, embedding, updated_at) "
-                + "VALUES (?, ?::vector, NOW()) "
-                + "ON CONFLICT (product_id) "
-                + "DO UPDATE SET embedding = EXCLUDED.embedding, updated_at = NOW()";
-
-        jdbcTemplate.update(sql, productId, pgVector);
+        return pgVector;
     }
 
-    public void delete(UUID productId) {
-        jdbcTemplate.update("DELETE FROM product_embeddings WHERE product_id = ?", productId);
+    public record EmbeddingVectors(
+            List<Double> embedding,
+            List<Double> identityEmbedding,
+            List<Double> benefitEmbedding,
+            List<Double> ingredientEmbedding,
+            List<Double> usageEmbedding
+    ) {
     }
 }

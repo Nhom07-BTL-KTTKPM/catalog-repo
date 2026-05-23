@@ -71,7 +71,6 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("skincare")
                 .description("Các sản phẩm chăm sóc da mặt và cơ thể")
                 .imageUrl("https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400")
-                .displayOrder(1)
                 .isActive(true)
                 .build();
         categoryRepository.save(skincare);
@@ -83,7 +82,6 @@ public class DataInitializer implements CommandLineRunner {
                 .description("Tinh chất dưỡng da cô đặc với thành phần hoạt tính cao")
                 .imageUrl("https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400")
                 .parentId(skincare.getId())
-                .displayOrder(1)
                 .isActive(true)
                 .build();
         categoryRepository.save(serum);
@@ -94,7 +92,6 @@ public class DataInitializer implements CommandLineRunner {
                 .description("Các sản phẩm làm sạch da mặt nhẹ nhàng")
                 .imageUrl("https://images.unsplash.com/photo-1556229010-aa9e5c46b319?w=400")
                 .parentId(skincare.getId())
-                .displayOrder(2)
                 .isActive(true)
                 .build();
         categoryRepository.save(cleanser);
@@ -105,7 +102,6 @@ public class DataInitializer implements CommandLineRunner {
                 .description("Kem dưỡng ẩm cho da mặt và body")
                 .imageUrl("https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400")
                 .parentId(skincare.getId())
-                .displayOrder(3)
                 .isActive(true)
                 .build();
         categoryRepository.save(moisturizer);

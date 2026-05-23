@@ -47,15 +47,19 @@ internal:
 
 embedding:
   enabled: ${EMBEDDING_ENABLED:true}
-  provider: ${EMBEDDING_PROVIDER:gemini}
-  api-key: ${EMBEDDING_API_KEY}
-  model: ${EMBEDDING_MODEL:text-embedding-004}
-  endpoint: ${EMBEDDING_ENDPOINT:https://generativelanguage.googleapis.com/v1beta/models}
   vector-dimension: ${EMBEDDING_VECTOR_DIMENSION:768}
+  min-score: ${EMBEDDING_MIN_SCORE:0.35}
+  ollama:
+    base-url: ${EMBEDDING_OLLAMA_BASE_URL:http://localhost:11434}
+    model: ${EMBEDDING_OLLAMA_MODEL:nomic-embed-text}
+    timeout: ${EMBEDDING_OLLAMA_TIMEOUT:20s}
   reindex:
     enabled: ${EMBEDDING_REINDEX_ENABLED:true}
     cron: ${EMBEDDING_REINDEX_CRON:0 0 * * * *}
     batch-size: ${EMBEDDING_REINDEX_BATCH_SIZE:200}
+    lock:
+      enabled: ${EMBEDDING_REINDEX_LOCK_ENABLED:true}
+      key: ${EMBEDDING_REINDEX_LOCK_KEY:731925}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

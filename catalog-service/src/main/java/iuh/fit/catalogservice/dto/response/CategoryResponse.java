@@ -1,12 +1,12 @@
 package iuh.fit.catalogservice.dto.response;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Response DTO for Category
@@ -22,7 +22,6 @@ public class CategoryResponse {
     private String description;
     private String imageUrl;
     private UUID parentId;
-    private Integer displayOrder;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

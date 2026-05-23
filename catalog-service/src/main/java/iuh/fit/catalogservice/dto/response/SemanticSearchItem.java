@@ -10,15 +10,18 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class SemanticSearchItem {
 
     private UUID productId;
     private String name;
+    private String description;
     private String ingredients;
     private String usageInstructions;
+    private String categoryName;
+    private String brandName;
     private List<String> suitableSkinTypes;
     private List<String> skinConcerns;
     private BigDecimal minPrice;

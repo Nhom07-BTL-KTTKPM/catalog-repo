@@ -1,16 +1,15 @@
 package iuh.fit.catalogservice.repo;
 
-import iuh.fit.catalogservice.entity.Category;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import iuh.fit.catalogservice.entity.Category;
 
 /**
  * Repository for Category entity
@@ -24,26 +23,22 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     /**
      * Lấy toàn bộ danh mục đang hoạt động.
-     * Dữ liệu được sắp xếp dựa trên thứ tự hiển thị (displayOrder) được cấu hình bởi Admin.
+        * Dữ liệu được sắp xếp theo tên danh mục để đảm bảo thứ tự ổn định.
      */
-    List<Category> findByIsActiveTrueOrderByDisplayOrderAsc();
+    List<Category> findByIsActiveTrueOrderByNameAsc();
 
     /**
      * Lấy các Danh mục Gốc (Root Categories).
      * Đây là những danh mục cấp 1, không có danh mục cha (parentId = null).
      */
-    List<Category> findByParentIdIsNullAndIsActiveTrueOrderByDisplayOrderAsc();
+        List<Category> findByParentIdIsNullAndIsActiveTrueOrderByNameAsc();
 
     /**
      * Lấy danh sách các danh mục con thuộc về một danh mục cha cụ thể.
      * @param parentId ID của danh mục cha.
      */
-    List<Category> findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc(UUID parentId);
+        List<Category> findByParentIdAndIsActiveTrueOrderByNameAsc(UUID parentId);
 
-    /**
-     * Lấy toàn bộ danh mục dưới dạng phân trang (Dành cho Admin).
-     */
-    Page<Category> findAll(Pageable pageable);
 
     /**
      * Kiểm tra tính duy nhất của slug trước khi lưu dữ liệu.
@@ -58,12 +53,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     /**
      * Lấy danh sách rút gọn (id, name, slug, imageUrl) của tất cả danh mục đang hoạt động.
-     * Sắp xếp theo displayOrder để giữ đúng thứ tự hiển thị do Admin cấu hình.
+     * Sắp xếp theo tên để giữ thứ tự ổn định.
      * Dùng cho menu, sidebar, bộ lọc trên giao diện.
      */
     @Query("SELECT new iuh.fit.catalogservice.dto.response.CategorySummaryResponse(" +
             "c.id, c.name, c.slug, c.imageUrl) " +
-            "FROM Category c WHERE c.isActive = true ORDER BY c.displayOrder ASC")
+            "FROM Category c WHERE c.isActive = true ORDER BY c.name ASC")
     List<iuh.fit.catalogservice.dto.response.CategorySummaryResponse> findAllActiveSummaries();
 
     /**
@@ -73,7 +68,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("SELECT new iuh.fit.catalogservice.dto.response.CategorySummaryResponse(" +
             "c.id, c.name, c.slug, c.imageUrl) " +
             "FROM Category c WHERE c.isActive = true AND c.parentId IS NULL " +
-            "ORDER BY c.displayOrder ASC")
+            "ORDER BY c.name ASC")
     List<iuh.fit.catalogservice.dto.response.CategorySummaryResponse> findRootActiveSummaries();
 }
 
