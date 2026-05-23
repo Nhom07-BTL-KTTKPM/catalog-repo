@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
+import java.util.List;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 
 /**
  * Service interface for Product operations
@@ -101,5 +103,10 @@ public interface ProductService {
      * Update product price range based on variants
      */
     void updateProductPriceRange(UUID productId);
+
+    /**
+     * Increment totalSold count for multiple products
+     */
+    void incrementTotalSold(List<ProductSoldUpdateRequest> requests);
 }
 

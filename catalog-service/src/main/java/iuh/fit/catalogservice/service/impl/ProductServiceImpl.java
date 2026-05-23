@@ -29,6 +29,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Implementation of ProductService
@@ -108,6 +111,34 @@ public class ProductServiceImpl implements ProductService {
 
         return mapToResponse(savedProduct);
     }
+
+        @Override
+        public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
+                if (requests == null || requests.isEmpty()) {
+                        return;
+                }
+
+                Map<UUID, Integer> sumByProduct = new HashMap<>();
+                for (ProductSoldUpdateRequest req : requests) {
+                        if (req == null || req.productId() == null || req.quantity() == null) {
+                                continue;
+                        }
+                        sumByProduct.merge(req.productId(), req.quantity(), Integer::sum);
+                }
+
+                if (sumByProduct.isEmpty()) {
+                        return;
+                }
+
+                List<Product> products = productRepository.findAllById(sumByProduct.keySet());
+                for (Product p : products) {
+                        Integer add = sumByProduct.get(p.getProductId());
+                        if (add == null) continue;
+                        p.setTotalSold((p.getTotalSold() == null ? 0 : p.getTotalSold()) + add);
+                }
+
+                productRepository.saveAll(products);
+        }
 
     @Override
     public ProductResponse updateProduct(UUID id, ProductRequest request) {

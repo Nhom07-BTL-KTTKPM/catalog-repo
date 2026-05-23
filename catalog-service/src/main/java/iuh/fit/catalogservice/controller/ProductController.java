@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -167,6 +169,12 @@ public class ProductController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> updateProductPriceRange(@PathVariable UUID id) {
         productService.updateProductPriceRange(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/total-sold/increment")
+    public ResponseEntity<Void> incrementProductTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
+        productService.incrementTotalSold(requests);
         return ResponseEntity.ok().build();
     }
 }

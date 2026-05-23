@@ -1,7 +1,9 @@
 package iuh.fit.catalogservice.repo;
 
 import iuh.fit.catalogservice.entity.ProductVariant;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +23,10 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
      * Tìm biến thể dựa trên mã quản lý kho (SKU - Stock Keeping Unit).
      */
     Optional<ProductVariant> findBySku(String sku);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT pv FROM ProductVariant pv JOIN FETCH pv.product WHERE pv.id = :variantId")
+    Optional<ProductVariant> findByIdForUpdate(@Param("variantId") UUID variantId);
 
     /**
      * Lấy tất cả biến thể của một sản phẩm (bao gồm cả các mẫu đã ngừng bán).
