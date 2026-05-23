@@ -46,6 +46,11 @@ public interface ProductService {
     Page<ProductResponse> getAllActiveProducts(Pageable pageable);
 
     /**
+     * Get all products for admin panel (includes inactive)
+     */
+    Page<ProductResponse> getAllProducts(Pageable pageable);
+
+    /**
      * Get featured products
      */
     Page<ProductResponse> getFeaturedProducts(Pageable pageable);

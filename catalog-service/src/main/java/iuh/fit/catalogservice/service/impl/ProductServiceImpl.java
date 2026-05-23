@@ -334,6 +334,14 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::mapToResponse);
     }
 
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductResponse> getAllProducts(Pageable pageable) {
+                log.debug("Fetching all products for admin panel");
+                return productRepository.findAllWithBrandAndCategory(pageable)
+                                .map(this::mapToResponse);
+        }
+
     @Override
     @Transactional(readOnly = true)
     public Page<ProductResponse> getFeaturedProducts(Pageable pageable) {
