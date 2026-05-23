@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable UUID id) {
         ProductResponse response = productService.getProductById(id);
         return ResponseEntity.ok(response);
@@ -79,6 +80,14 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponse>> getAllActiveProducts(
             @PageableDefault(size = 20) Pageable pageable) {
         Page<ProductResponse> response = productService.getAllActiveProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<Page<ProductResponse>> getAllProductsForAdmin(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ProductResponse> response = productService.getAllProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -169,14 +178,14 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:[0-9a-fA-F\\\\-]{36}}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/update-price-range")
+    @PostMapping("/{id:[0-9a-fA-F\\\\-]{36}}/update-price-range")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> updateProductPriceRange(@PathVariable UUID id) {
         productService.updateProductPriceRange(id);
