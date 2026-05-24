@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
+
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
@@ -132,10 +132,10 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductResponse>> searchProducts(
+    public ResponseEntity<Page<ProductResponse>> searchBySlugOrDescription(
             @RequestParam String keyword,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.searchProducts(keyword, pageable);
+        Page<ProductResponse> response = productService.searchBySlugOrDescription(keyword, pageable);
         return ResponseEntity.ok(response);
     }
 

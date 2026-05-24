@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -65,13 +65,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     /**
      * Chức năng Thanh tìm kiếm:
-     * Tìm từ khóa xuất hiện trong TÊN sản phẩm HOẶC MÔ TẢ sản phẩm.
+     * Tìm từ khóa xuất hiện trong SLUG sản phẩm HOẶC MÔ TẢ sản phẩm.
+     * Bỏ qua tìm theo tên sản phẩm.
      */
     @Query("SELECT p FROM Product p WHERE " +
-            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "(LOWER(p.slug) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND p.isActive = true")
-    Page<Product> searchProducts(@Param("keyword") String keyword, Pageable pageable);
+        Page<Product> searchBySlugOrDescription(@Param("keyword") String keyword, Pageable pageable);
 
     /**
      * Lấy top sản phẩm bán chạy nhất toàn hệ thống (Dựa vào cột totalSold).

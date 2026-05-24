@@ -388,14 +388,14 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::mapToResponse);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductResponse> searchProducts(String keyword, Pageable pageable) {
-        log.debug("Searching products with keyword: {}", keyword);
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductResponse> searchBySlugOrDescription(String keyword, Pageable pageable) {
+                log.debug("Searching products by slug or description with keyword: {}", keyword);
 
-        return productRepository.searchProducts(keyword, pageable)
-                .map(this::mapToResponse);
-    }
+                return productRepository.searchBySlugOrDescription(keyword, pageable)
+                                .map(this::mapToResponse);
+        }
 
     @Override
     @Transactional(readOnly = true)

@@ -1,9 +1,11 @@
 package iuh.fit.catalogservice.service;
 
+import java.util.List;
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.List;
+
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
@@ -76,9 +78,9 @@ public interface ProductService {
     Page<ProductResponse> getProductsByCategoryAndBrand(UUID categoryId, UUID brandId, Pageable pageable);
 
     /**
-     * Search products
+     * Search products by slug or description
      */
-    Page<ProductResponse> searchProducts(String keyword, Pageable pageable);
+    Page<ProductResponse> searchBySlugOrDescription(String keyword, Pageable pageable);
 
     /**
      * Get best-selling products
