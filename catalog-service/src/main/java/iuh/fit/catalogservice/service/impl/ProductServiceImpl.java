@@ -566,6 +566,7 @@ public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
                                                 .sum())
                                 .minPrice(product.getMinPrice())
                                 .maxPrice(product.getMaxPrice())
+                                .isActive(product.getIsActive())
                                 .isFeatured(product.getIsFeatured())
                                 .thumbnail(resolveThumbnail(product))
                                 .build();

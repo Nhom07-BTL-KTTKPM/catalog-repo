@@ -24,6 +24,7 @@ public class ProductCardResponse {
     private Integer totalStock;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
+    private Boolean isActive;
     private Boolean isFeatured;
     private String thumbnail;
 }
