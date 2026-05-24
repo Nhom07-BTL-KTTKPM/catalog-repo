@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
+import iuh.fit.catalogservice.dto.response.ProductCardResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
-
 
 /**
  * Service interface for Product operations
@@ -40,12 +40,12 @@ public interface ProductService {
     /**
      * Get product by slug
      */
-    ProductResponse getProductBySlug(String slug);
+    ProductCardResponse getProductBySlug(String slug);
 
     /**
      * Get all active products with pagination
      */
-    Page<ProductResponse> getAllActiveProducts(Pageable pageable);
+    Page<ProductCardResponse> getAllActiveProducts(Pageable pageable);
 
     /**
      * Get all products for admin panel (includes inactive)
@@ -55,42 +55,42 @@ public interface ProductService {
     /**
      * Get featured products
      */
-    Page<ProductResponse> getFeaturedProducts(Pageable pageable);
+    Page<ProductCardResponse> getFeaturedProducts(Pageable pageable);
 
     /**
      * Get products by category
      */
-    Page<ProductResponse> getProductsByCategory(UUID categoryId, Pageable pageable);
+    Page<ProductCardResponse> getProductsByCategory(UUID categoryId, Pageable pageable);
 
     /**
      * Get products by root category ID (includes all subcategories)
      */
-    Page<ProductResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable);
+    Page<ProductCardResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable);
 
     /**
      * Get products by brand
      */
-    Page<ProductResponse> getProductsByBrand(UUID brandId, Pageable pageable);
+    Page<ProductCardResponse> getProductsByBrand(UUID brandId, Pageable pageable);
 
     /**
      * Get products by category and brand
      */
-    Page<ProductResponse> getProductsByCategoryAndBrand(UUID categoryId, UUID brandId, Pageable pageable);
+    Page<ProductCardResponse> getProductsByCategoryAndBrand(UUID categoryId, UUID brandId, Pageable pageable);
 
     /**
      * Search products by slug or description
      */
-    Page<ProductResponse> searchBySlugOrDescription(String keyword, Pageable pageable);
+    Page<ProductCardResponse> searchBySlugOrDescription(String keyword, Pageable pageable);
 
     /**
      * Get best-selling products
      */
-    Page<ProductResponse> getBestSellingProducts(Pageable pageable);
+    Page<ProductCardResponse> getBestSellingProducts(Pageable pageable);
 
     /**
      * Get top-rated products
      */
-    Page<ProductResponse> getTopRatedProducts(Pageable pageable);
+    Page<ProductCardResponse> getTopRatedProducts(Pageable pageable);
 
     /**
      * Get products by skin type
@@ -121,7 +121,4 @@ public interface ProductService {
      * Increment totalSold count for multiple products
      */
     void incrementTotalSold(List<ProductSoldUpdateRequest> requests);
-
-
 }
-

@@ -22,6 +22,7 @@ import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
+import iuh.fit.catalogservice.dto.response.ProductCardResponse;
 import iuh.fit.catalogservice.dto.response.ProductImageResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
@@ -317,22 +318,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public ProductResponse getProductBySlug(String slug) {
+        public ProductCardResponse getProductBySlug(String slug) {
         log.debug("Fetching product with slug: {}", slug);
 
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with slug: " + slug));
 
-        return mapToResponse(product);
+                return mapToCardResponse(product);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getAllActiveProducts(Pageable pageable) {
+        public Page<ProductCardResponse> getAllActiveProducts(Pageable pageable) {
         log.debug("Fetching all active products with pagination");
 
         return productRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
         @Override
@@ -345,74 +346,74 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getFeaturedProducts(Pageable pageable) {
+        public Page<ProductCardResponse> getFeaturedProducts(Pageable pageable) {
         log.debug("Fetching featured products");
 
         return productRepository.findByIsFeaturedTrueAndIsActiveTrueOrderByTotalSoldDesc(pageable)
-                .map(this::mapToResponse);
+                .map(this::mapToCardResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByCategory(UUID categoryId, Pageable pageable) {
+        public Page<ProductCardResponse> getProductsByCategory(UUID categoryId, Pageable pageable) {
         log.debug("Fetching products for category ID: {}", categoryId);
 
         return productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable) {
+        public Page<ProductCardResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable) {
         log.debug("Fetching products for root category ID: {} (including subcategories)", rootCategoryId);
 
         return productRepository.findByRootCategoryId(rootCategoryId, pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByBrand(UUID brandId, Pageable pageable) {
+        public Page<ProductCardResponse> getProductsByBrand(UUID brandId, Pageable pageable) {
         log.debug("Fetching products for brand ID: {}", brandId);
 
         return productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getProductsByCategoryAndBrand(UUID categoryId, UUID brandId, Pageable pageable) {
+        public Page<ProductCardResponse> getProductsByCategoryAndBrand(UUID categoryId, UUID brandId, Pageable pageable) {
         log.debug("Fetching products for category ID: {} and brand ID: {}", categoryId, brandId);
 
         return productRepository.findByCategoryIdAndBrandIdAndIsActiveTrue(categoryId, brandId, pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
         @Override
         @Transactional(readOnly = true)
-        public Page<ProductResponse> searchBySlugOrDescription(String keyword, Pageable pageable) {
+        public Page<ProductCardResponse> searchBySlugOrDescription(String keyword, Pageable pageable) {
                 log.debug("Searching products by slug or description with keyword: {}", keyword);
 
                 return productRepository.searchBySlugOrDescription(keyword, pageable)
-                                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
         }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getBestSellingProducts(Pageable pageable) {
+        public Page<ProductCardResponse> getBestSellingProducts(Pageable pageable) {
         log.debug("Fetching best-selling products");
 
         return productRepository.findBestSellingProducts(pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductResponse> getTopRatedProducts(Pageable pageable) {
+        public Page<ProductCardResponse> getTopRatedProducts(Pageable pageable) {
         log.debug("Fetching top-rated products");
 
         return productRepository.findTopRatedProducts(pageable)
-                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
     }
 
     @Override
@@ -555,6 +556,32 @@ public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
                 .updatedAt(product.getUpdatedAt())
                 .build();
     }
+
+        private ProductCardResponse mapToCardResponse(Product product) {
+                return ProductCardResponse.builder()
+                                .id(product.getProductId())
+                                .name(product.getName())
+                                .slug(product.getSlug())
+                                .averageRating(product.getAverageRating())
+                                .totalSold(product.getTotalSold())
+                                .minPrice(product.getMinPrice())
+                                .maxPrice(product.getMaxPrice())
+                                .isFeatured(product.getIsFeatured())
+                                .thumbnail(resolveThumbnail(product))
+                                .build();
+        }
+
+        private String resolveThumbnail(Product product) {
+                if (product.getImages() == null || product.getImages().isEmpty()) {
+                        return null;
+                }
+
+                return product.getImages().stream()
+                                .filter(image -> Boolean.TRUE.equals(image.getIsPrimary()))
+                                .map(ProductImage::getUrl)
+                                .findFirst()
+                                .orElseGet(() -> product.getImages().get(0).getUrl());
+        }
 
     private ProductImageResponse mapImageToResponse(iuh.fit.catalogservice.entity.ProductImage image) {
         return ProductImageResponse.builder()

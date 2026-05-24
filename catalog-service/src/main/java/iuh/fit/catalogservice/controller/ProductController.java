@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
+import iuh.fit.catalogservice.dto.response.ProductCardResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -71,15 +72,15 @@ public class ProductController {
     }
 
     @GetMapping("/slug/{slug}")
-    public ResponseEntity<ProductResponse> getProductBySlug(@PathVariable String slug) {
-        ProductResponse response = productService.getProductBySlug(slug);
+    public ResponseEntity<ProductCardResponse> getProductBySlug(@PathVariable String slug) {
+        ProductCardResponse response = productService.getProductBySlug(slug);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllActiveProducts(
+    public ResponseEntity<Page<ProductCardResponse>> getAllActiveProducts(
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getAllActiveProducts(pageable);
+        Page<ProductCardResponse> response = productService.getAllActiveProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -92,64 +93,64 @@ public class ProductController {
     }
 
     @GetMapping("/featured")
-    public ResponseEntity<Page<ProductResponse>> getFeaturedProducts(
+    public ResponseEntity<Page<ProductCardResponse>> getFeaturedProducts(
             @PageableDefault(size = 10) Pageable pageable) {
-        Page<ProductResponse> response = productService.getFeaturedProducts(pageable);
+        Page<ProductCardResponse> response = productService.getFeaturedProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<Page<ProductResponse>> getProductsByCategory(
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByCategory(
             @PathVariable UUID categoryId,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getProductsByCategory(categoryId, pageable);
+        Page<ProductCardResponse> response = productService.getProductsByCategory(categoryId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/category/root/{rootCategoryId}")
-    public ResponseEntity<Page<ProductResponse>> getProductsByRootCategory(
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByRootCategory(
             @PathVariable UUID rootCategoryId,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getProductsByRootCategory(rootCategoryId, pageable);
+        Page<ProductCardResponse> response = productService.getProductsByRootCategory(rootCategoryId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/brand/{brandId}")
-    public ResponseEntity<Page<ProductResponse>> getProductsByBrand(
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByBrand(
             @PathVariable UUID brandId,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getProductsByBrand(brandId, pageable);
+        Page<ProductCardResponse> response = productService.getProductsByBrand(brandId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/category/{categoryId}/brand/{brandId}")
-    public ResponseEntity<Page<ProductResponse>> getProductsByCategoryAndBrand(
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByCategoryAndBrand(
             @PathVariable UUID categoryId,
             @PathVariable UUID brandId,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getProductsByCategoryAndBrand(categoryId, brandId, pageable);
+        Page<ProductCardResponse> response = productService.getProductsByCategoryAndBrand(categoryId, brandId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductResponse>> searchBySlugOrDescription(
+    public ResponseEntity<Page<ProductCardResponse>> searchBySlugOrDescription(
             @RequestParam String keyword,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.searchBySlugOrDescription(keyword, pageable);
+        Page<ProductCardResponse> response = productService.searchBySlugOrDescription(keyword, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/best-selling")
-    public ResponseEntity<Page<ProductResponse>> getBestSellingProducts(
+    public ResponseEntity<Page<ProductCardResponse>> getBestSellingProducts(
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getBestSellingProducts(pageable);
+        Page<ProductCardResponse> response = productService.getBestSellingProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/top-rated")
-    public ResponseEntity<Page<ProductResponse>> getTopRatedProducts(
+    public ResponseEntity<Page<ProductCardResponse>> getTopRatedProducts(
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<ProductResponse> response = productService.getTopRatedProducts(pageable);
+        Page<ProductCardResponse> response = productService.getTopRatedProducts(pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -192,10 +193,9 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-@PostMapping("/total-sold/increment")
+    @PostMapping("/total-sold/increment")
     public ResponseEntity<Void> incrementTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
         productService.incrementTotalSold(requests);
         return ResponseEntity.ok().build();
     }
 }
-

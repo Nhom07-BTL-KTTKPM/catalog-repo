@@ -168,6 +168,20 @@ Các DTO chính được sử dụng trong controller đã đọc từ source. B
 
 Request đã có các ràng buộc (sku not blank, variantName not blank, price > 0, stockQuantity not null). Response có fields: `id`, `productId`, `sku`, `variantName`, `price`, `originalPrice`, `stockQuantity`, `sold`, `imageUrl`, `isActive`, `createdAt`, `updatedAt`.
 
+### 3.9 `ProductCardResponse` (Response cho list/search)
+
+| Field | Kiểu | Mô tả |
+|---|---:|---|
+| `id` | UUID | Id sản phẩm |
+| `name` | string | Tên |
+| `slug` | string | Slug |
+| `averageRating` | double | Đánh giá trung bình |
+| `totalSold` | int | Đã bán |
+| `minPrice` | BigDecimal | Giá min |
+| `maxPrice` | BigDecimal | Giá max |
+| `isFeatured` | boolean | Nổi bật |
+| `thumbnail` | string | Ảnh đại diện lấy từ image có `isPrimary = true` |
+
 ---
 
 ## 4. Brand APIs
@@ -626,19 +640,21 @@ Validation rules: `name` not blank; `categoryId`, `brandId` not null; each varia
 
 - Method: `GET`
 - URL: `/api/v1/catalog/products/slug/{slug}`
+- Public — trả `ProductCardResponse`
 
 ### 6.5 Danh sách sản phẩm (pagination)
 
 - Method: `GET`
 - URL: `/api/v1/catalog/products`
 - Query params: `page` (0), `size` (20), `sort`
-- Success: `200 OK` với `Page<ProductResponse>`
+- Success: `200 OK` với `Page<ProductCardResponse>`
 
 ### 6.6 Lấy featured products
 
 - Method: `GET`
 - URL: `/api/v1/catalog/products/featured`
 - Query params: `page` (0), `size` (10)
+- Success: `200 OK` với `Page<ProductCardResponse>`
 
 ### 6.7 Lấy sản phẩm theo category/brand/combined
 
@@ -648,18 +664,21 @@ Validation rules: `name` not blank; `categoryId`, `brandId` not null; each varia
 	- `/api/v1/catalog/products/brand/{brandId}`
 	- `/api/v1/catalog/products/category/{categoryId}/brand/{brandId}`
 - Query params: `page`, `size`, `sort`
+- Success: `200 OK` với `Page<ProductCardResponse>`
 
-### 6.8 Search products
+### 6.8 Search products theo slug hay description
 
 - Method: `GET`
 - URL: `/api/v1/catalog/products/search?keyword={keyword}`
 - Query params: `page`, `size`
-
+ví dụ:api/v1/catalog/products/search?keyword=ordinary
+- Success: `200 OK` với `Page<ProductCardResponse>`
 ### 6.9 Best-selling / Top-rated
 
 - `/api/v1/catalog/products/best-selling`
 - `/api/v1/catalog/products/top-rated`
 - Both support pagination
+- Success: `200 OK` với `Page<ProductCardResponse>`
 
 ### 6.10 Filter by skin type / concern / price range
 
