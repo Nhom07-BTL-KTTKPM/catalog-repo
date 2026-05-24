@@ -50,7 +50,7 @@ public interface ProductService {
     /**
      * Get all products for admin panel (includes inactive)
      */
-    Page<ProductResponse> getAllProducts(Pageable pageable);
+    Page<ProductCardResponse> getAllProducts(Pageable pageable);
 
     /**
      * Get featured products

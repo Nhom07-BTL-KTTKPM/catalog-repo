@@ -21,6 +21,7 @@ public class ProductCardResponse {
     private String slug;
     private Double averageRating;
     private Integer totalSold;
+    private Integer totalStock;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Boolean isFeatured;

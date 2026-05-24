@@ -346,10 +346,10 @@ public class ProductServiceImpl implements ProductService {
 
         @Override
         @Transactional(readOnly = true)
-        public Page<ProductResponse> getAllProducts(Pageable pageable) {
+        public Page<ProductCardResponse> getAllProducts(Pageable pageable) {
                 log.debug("Fetching all products for admin panel");
                 return productRepository.findAllWithBrandAndCategory(pageable)
-                                .map(this::mapToResponse);
+                                .map(this::mapToCardResponse);
         }
 
     @Override
@@ -560,6 +560,10 @@ public void incrementTotalSold(List<ProductSoldUpdateRequest> requests) {
                                 .slug(product.getSlug())
                                 .averageRating(product.getAverageRating())
                                 .totalSold(product.getTotalSold())
+                                .totalStock(product.getVariants() == null ? 0 : product.getVariants().stream()
+                                                .map(ProductVariant::getStockQuantity)
+                                                .mapToInt(quantity -> quantity == null ? 0 : quantity)
+                                                .sum())
                                 .minPrice(product.getMinPrice())
                                 .maxPrice(product.getMaxPrice())
                                 .isFeatured(product.getIsFeatured())
