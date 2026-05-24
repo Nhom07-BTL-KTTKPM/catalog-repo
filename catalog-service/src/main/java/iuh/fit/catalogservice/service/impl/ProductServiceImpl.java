@@ -168,14 +168,22 @@ public class ProductServiceImpl implements ProductService {
                 Product product = productRepository.findById(id)
                                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + id));
 
-                product.setIsActive(request.getIsActive());
+                        Boolean newStatus = request.getIsActive();
 
-                Product updatedProduct = productRepository.save(product);
-                log.info("Updated product isActive status with ID: {}", updatedProduct.getProductId());
+                        product.setIsActive(newStatus);
 
-                productEmbeddingService.indexProduct(updatedProduct);
+                        // Also set the same active flag on all variants belonging to this product
+                        if (product.getVariants() != null) {
+                                product.getVariants().forEach(variant -> variant.setIsActive(newStatus));
+                        }
 
-                return mapToResponse(updatedProduct);
+                        Product updatedProduct = productRepository.save(product);
+                        log.info("Updated product isActive status with ID: {} (isActive={})", updatedProduct.getProductId(), newStatus);
+
+                        // Reindex or remove embeddings depending on new status
+                        productEmbeddingService.indexProduct(updatedProduct);
+
+                        return mapToResponse(updatedProduct);
         }
 
         private void validateProductRequest(ProductRequest request) {
