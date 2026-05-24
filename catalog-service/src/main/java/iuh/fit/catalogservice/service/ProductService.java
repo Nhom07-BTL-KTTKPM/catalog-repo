@@ -108,11 +108,6 @@ public interface ProductService {
     Page<ProductResponse> getProductsByPriceRange(Double minPrice, Double maxPrice, Pageable pageable);
 
     /**
-     * Delete product
-     */
-    void deleteProduct(UUID id);
-
-    /**
      * Update product price range based on variants
      */
     void updateProductPriceRange(UUID productId);

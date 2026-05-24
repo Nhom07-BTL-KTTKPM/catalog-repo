@@ -685,13 +685,25 @@ ví dụ:api/v1/catalog/products/search?keyword=ordinary
 - `/api/v1/catalog/products/skin-type/{skinType}`
 - `/api/v1/catalog/products/skin-concern/{skinConcern}`
 - `/api/v1/catalog/products/price-range?minPrice={minPrice}&maxPrice={maxPrice}`
+- Always encode path variables containing spaces or UTF-8 characters using encodeURIComponent().
+- No: GET /skin-type/da khô
+- Yes: skin-type/Da%20kh%C3%B4
+### 6.11 Cập nhật trạng thái Product
 
-### 6.11 Xóa Product
+- Method: `PATCH`
+- URL: `/api/v1/catalog/products/{id}/status`
+- Body: `ProductStatusRequest`
+- Roles: `ROLE_ADMIN`, `ROLE_EMPLOYEE`
+- Ý nghĩa: chỉ cập nhật `isActive` để ẩn/hiện product, không xóa dữ liệu khỏi database.
+- Success: `200 OK`
 
-- Method: `DELETE`
-- URL: `/api/v1/catalog/products/{id}`
-- Roles: `ROLE_ADMIN`
-- Success: `204 No Content`
+Ví dụ request:
+
+```json
+{
+    "isActive": false
+}
+```
 
 ### 6.12 Operational endpoints
 

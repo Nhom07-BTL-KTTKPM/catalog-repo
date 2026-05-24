@@ -444,18 +444,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(UUID id) {
-        log.info("Deleting product with ID: {}", id);
-
-        if (!productRepository.existsById(id)) {
-            throw new IllegalArgumentException("Product not found with ID: " + id);
-        }
-
-        productRepository.deleteById(id);
-        log.info("Deleted product with ID: {}", id);
-    }
-
-    @Override
     public void updateProductPriceRange(UUID productId) {
         log.debug("Updating price range for product ID: {}", productId);
 
