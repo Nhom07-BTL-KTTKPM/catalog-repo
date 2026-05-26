@@ -136,6 +136,22 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId AND p.isActive = true")
     long countByCategoryIdAndIsActiveTrue(@Param("categoryId") UUID categoryId);
 
+        /**
+         * Đếm tổng số sản phẩm đang bán.
+         */
+        long countByIsActiveTrue();
+
+        /**
+         * Đếm tổng số sản phẩm tiêu biểu.
+         */
+        long countByIsFeaturedTrue();
+
+        /**
+         * Đếm các sản phẩm có tổng tồn kho bằng 0.
+         */
+        @Query("SELECT COUNT(p) FROM Product p WHERE (SELECT COALESCE(SUM(pv.stockQuantity), 0) FROM ProductVariant pv WHERE pv.product.productId = p.productId) = 0")
+        long countOutOfStockProducts();
+
     /**
      * Đếm tổng số sản phẩm của một Thương hiệu.
      */
