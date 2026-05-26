@@ -59,6 +59,11 @@ public interface ProductService {
     Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, Pageable pageable);
 
     /**
+     * Get all products for admin panel with optional brand/category filters and keyword search.
+     */
+    Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, String keyword, Pageable pageable);
+
+    /**
      * Get featured products
      */
     Page<ProductCardResponse> getFeaturedProducts(Pageable pageable);

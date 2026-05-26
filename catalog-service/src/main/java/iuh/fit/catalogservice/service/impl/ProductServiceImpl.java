@@ -358,11 +358,17 @@ public class ProductServiceImpl implements ProductService {
         @Override
         @Transactional(readOnly = true)
         public Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, Pageable pageable) {
-                if (brandId == null && categoryId == null) {
+                return getAllProducts(brandId, categoryId, null, pageable);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, String keyword, Pageable pageable) {
+                if (brandId == null && categoryId == null && (keyword == null || keyword.isBlank())) {
                         return getAllProducts(pageable);
                 }
 
-                log.debug("Fetching admin products with filters - brand ID: {}, category ID: {}", brandId, categoryId);
+                log.debug("Fetching admin products with filters - brand ID: {}, category ID: {}, keyword: {}", brandId, categoryId, keyword);
 
                 Specification<Product> specification = (root, query, cb) -> {
                         query.distinct(true);
@@ -370,29 +376,55 @@ public class ProductServiceImpl implements ProductService {
                         List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
 
                         if (brandId != null) {
-				jakarta.persistence.criteria.Join<Object, Object> brandJoin = root.join("brand");
-				predicates.add(cb.equal(brandJoin.get("id"), brandId));
-			}
+                                jakarta.persistence.criteria.Join<Object, Object> brandJoin = root.join("brand");
+                                predicates.add(cb.equal(brandJoin.get("id"), brandId));
+                        }
 
-			if (categoryId != null) {
-				jakarta.persistence.criteria.Join<Object, Object> categoryJoin = root.join("category");
-				predicates.add(cb.equal(categoryJoin.get("id"), categoryId));
-			}
+                        if (categoryId != null) {
+                                jakarta.persistence.criteria.Join<Object, Object> categoryJoin = root.join("category");
+                                predicates.add(cb.equal(categoryJoin.get("id"), categoryId));
+                        }
 
-			if (predicates.isEmpty()) {
-				return cb.conjunction();
-			}
+                        if (keyword != null && !keyword.isBlank()) {
+                                String normalizedKeyword = keyword.trim().toLowerCase();
+                                String likePattern = "%" + escapeLikePattern(normalizedKeyword) + "%";
 
-			if (predicates.size() == 1) {
-				return predicates.get(0);
-			}
+                                jakarta.persistence.criteria.Subquery<Long> skuSubquery = query.subquery(Long.class);
+                                jakarta.persistence.criteria.Root<iuh.fit.catalogservice.entity.ProductVariant> variantRoot = skuSubquery.from(iuh.fit.catalogservice.entity.ProductVariant.class);
+                                skuSubquery.select(cb.literal(1L));
+                                skuSubquery.where(
+                                                cb.equal(variantRoot.get("product").get("productId"), root.get("productId")),
+                                                cb.like(cb.lower(variantRoot.get("sku")), likePattern, '\\')
+                                );
 
-			return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-		};
+                                predicates.add(cb.or(
+                                                cb.like(cb.lower(root.get("name")), likePattern, '\\'),
+                                                cb.like(cb.lower(root.get("slug")), likePattern, '\\'),
+                                                cb.exists(skuSubquery)
+                                ));
+                        }
 
-		return productRepository.findAll(specification, pageable)
-			.map(this::mapToCardResponse);
-	}
+                        if (predicates.isEmpty()) {
+                                return cb.conjunction();
+                        }
+
+                        if (predicates.size() == 1) {
+                                return predicates.get(0);
+                        }
+
+                        return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
+
+                return productRepository.findAll(specification, pageable)
+                                .map(this::mapToCardResponse);
+        }
+
+        private String escapeLikePattern(String value) {
+                return value
+                                .replace("\\", "\\\\")
+                                .replace("%", "\\%")
+                                .replace("_", "\\_");
+        }
 
 	@Override
 	@Transactional(readOnly = true)
