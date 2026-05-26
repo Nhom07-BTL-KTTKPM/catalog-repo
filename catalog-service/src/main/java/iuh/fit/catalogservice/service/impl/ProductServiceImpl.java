@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import iuh.fit.catalogservice.dto.request.ProductFilterRequest;
 import iuh.fit.catalogservice.dto.request.ProductImageRequest;
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
@@ -37,6 +38,7 @@ import iuh.fit.catalogservice.repo.ProductRepository;
 import iuh.fit.catalogservice.repo.ProductVariantRepository;
 import iuh.fit.catalogservice.service.ProductEmbeddingService;
 import iuh.fit.catalogservice.service.ProductService;
+import iuh.fit.catalogservice.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 /**
@@ -403,6 +405,15 @@ public class ProductServiceImpl implements ProductService {
                 log.debug("Searching products by slug or description with keyword: {}", keyword);
 
                 return productRepository.searchBySlugOrDescription(keyword, pageable)
+                                .map(this::mapToCardResponse);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductCardResponse> filterProducts(ProductFilterRequest filterRequest, Pageable pageable) {
+                log.debug("Filtering products with dynamic query parameters");
+
+                return productRepository.findAll(ProductSpecification.byFilter(filterRequest), pageable)
                                 .map(this::mapToCardResponse);
         }
 

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import iuh.fit.catalogservice.dto.request.ProductFilterRequest;
 import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
@@ -81,6 +82,11 @@ public interface ProductService {
      * Search products by slug or description
      */
     Page<ProductCardResponse> searchBySlugOrDescription(String keyword, Pageable pageable);
+
+    /**
+     * Filter products dynamically by query parameters.
+     */
+    Page<ProductCardResponse> filterProducts(ProductFilterRequest filterRequest, Pageable pageable);
 
     /**
      * Get best-selling products
