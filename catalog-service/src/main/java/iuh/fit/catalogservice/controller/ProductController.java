@@ -88,8 +88,10 @@ public class ProductController {
     @GetMapping("/admin")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public ResponseEntity<Page<ProductCardResponse>> getAllProductsForAdmin(
+            @RequestParam(required = false) UUID brandId,
+            @RequestParam(required = false) UUID categoryId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ProductCardResponse> response = productService.getAllProducts(pageable);
+        Page<ProductCardResponse> response = productService.getAllProducts(brandId, categoryId, pageable);
         return ResponseEntity.ok(response);
     }
 

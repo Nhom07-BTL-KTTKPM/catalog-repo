@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -354,18 +355,64 @@ public class ProductServiceImpl implements ProductService {
                                 .map(this::mapToCardResponse);
         }
 
-    @Override
-    @Transactional(readOnly = true)
-        public Page<ProductCardResponse> getFeaturedProducts(Pageable pageable) {
-        log.debug("Fetching featured products");
+        @Override
+        @Transactional(readOnly = true)
+        public Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, Pageable pageable) {
+                if (brandId == null && categoryId == null) {
+                        return getAllProducts(pageable);
+                }
 
-        return productRepository.findByIsFeaturedTrueAndIsActiveTrueOrderByTotalSoldDesc(pageable)
-                .map(this::mapToCardResponse);
-    }
+                log.debug("Fetching admin products with filters - brand ID: {}, category ID: {}", brandId, categoryId);
 
-    @Override
-    @Transactional(readOnly = true)
-        public Page<ProductCardResponse> getProductsByCategory(UUID categoryId, Pageable pageable) {
+                Specification<Product> specification = (root, query, cb) -> {
+                        query.distinct(true);
+
+                        List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+                        if (brandId != null) {
+				jakarta.persistence.criteria.Join<Object, Object> brandJoin = root.join("brand");
+				predicates.add(cb.equal(brandJoin.get("id"), brandId));
+			}
+
+			if (categoryId != null) {
+				jakarta.persistence.criteria.Join<Object, Object> categoryJoin = root.join("category");
+				predicates.add(cb.equal(categoryJoin.get("id"), categoryId));
+			}
+
+			if (predicates.isEmpty()) {
+				return cb.conjunction();
+			}
+
+			if (predicates.size() == 1) {
+				return predicates.get(0);
+			}
+
+			return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+		};
+
+		return productRepository.findAll(specification, pageable)
+			.map(this::mapToCardResponse);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<ProductCardResponse> getFeaturedProducts(Pageable pageable) {
+		log.debug("Fetching featured products");
+
+		Specification<Product> specification = (root, query, cb) -> {
+			List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+			predicates.add(cb.equal(root.get("isFeatured"), true));
+			predicates.add(cb.equal(root.get("isActive"), true));
+			return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+		};
+
+		return productRepository.findAll(specification, pageable)
+			.map(this::mapToCardResponse);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<ProductCardResponse> getProductsByCategory(UUID categoryId, Pageable pageable) {
         log.debug("Fetching products for category ID: {}", categoryId);
 
         return productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable)
