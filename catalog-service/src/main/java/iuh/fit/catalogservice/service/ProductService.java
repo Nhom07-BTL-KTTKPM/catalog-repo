@@ -11,6 +11,7 @@ import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.response.ProductCardResponse;
+import iuh.fit.catalogservice.dto.response.ProductOverviewResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 
 /**
@@ -62,6 +63,11 @@ public interface ProductService {
      * Get all products for admin panel with optional brand/category filters and keyword search.
      */
     Page<ProductCardResponse> getAllProducts(UUID brandId, UUID categoryId, String keyword, Pageable pageable);
+
+    /**
+     * Get summary numbers for the admin product overview cards.
+     */
+    ProductOverviewResponse getProductOverview();
 
     /**
      * Get featured products

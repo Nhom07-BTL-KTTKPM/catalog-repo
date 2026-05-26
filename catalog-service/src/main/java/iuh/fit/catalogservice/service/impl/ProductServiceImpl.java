@@ -26,6 +26,7 @@ import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.request.ProductVariantRequest;
 import iuh.fit.catalogservice.dto.response.ProductCardResponse;
 import iuh.fit.catalogservice.dto.response.ProductImageResponse;
+import iuh.fit.catalogservice.dto.response.ProductOverviewResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.dto.response.ProductVariantResponse;
 import iuh.fit.catalogservice.entity.Brand;
@@ -417,6 +418,19 @@ public class ProductServiceImpl implements ProductService {
 
                 return productRepository.findAll(specification, pageable)
                                 .map(this::mapToCardResponse);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public ProductOverviewResponse getProductOverview() {
+                log.debug("Fetching admin product overview summary");
+
+                return ProductOverviewResponse.builder()
+                                .totalProducts(productRepository.count())
+                                .activeProducts(productRepository.countByIsActiveTrue())
+                                .featuredProducts(productRepository.countByIsFeaturedTrue())
+                                .outOfStockProducts(productRepository.countOutOfStockProducts())
+                                .build();
         }
 
         private String escapeLikePattern(String value) {

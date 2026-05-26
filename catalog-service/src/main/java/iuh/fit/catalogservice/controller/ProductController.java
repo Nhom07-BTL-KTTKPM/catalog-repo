@@ -26,6 +26,7 @@ import iuh.fit.catalogservice.dto.request.ProductRequest;
 import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
 import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
 import iuh.fit.catalogservice.dto.response.ProductCardResponse;
+import iuh.fit.catalogservice.dto.response.ProductOverviewResponse;
 import iuh.fit.catalogservice.dto.response.ProductResponse;
 import iuh.fit.catalogservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -93,6 +94,13 @@ public class ProductController {
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ProductCardResponse> response = productService.getAllProducts(brandId, categoryId, keyword, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/overview")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductOverviewResponse> getProductOverview() {
+        ProductOverviewResponse response = productService.getProductOverview();
         return ResponseEntity.ok(response);
     }
 
