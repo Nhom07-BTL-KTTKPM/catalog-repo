@@ -30,7 +30,10 @@ public class SkinTypeSlugUtils {
         String withSimpleD = withoutDiacritics.replace('đ', 'd');
         
         // 4. Thay thế khoảng trắng và các ký tự đặc biệt bằng dấu gạch ngang
-        String slug = withSimpleD.replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
+        String slug = withSimpleD.replaceAll("[^a-z0-9\\s-]", "").replaceAll("\\s+", "-");
+
+        // 5. Chuẩn hóa lại dấu gạch ngang nếu input đã có sẵn dạng slug
+        slug = slug.replaceAll("-{2,}", "-").replaceAll("^-|-$", "");
         
         return slug;
     }
