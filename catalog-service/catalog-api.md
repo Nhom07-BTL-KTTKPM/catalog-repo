@@ -680,7 +680,22 @@ ví dụ:api/v1/catalog/products/search?keyword=ordinary
 - Both support pagination
 - Success: `200 OK` với `Page<ProductCardResponse>`
 
-### 6.10 Filter by skin type / concern / price range
+### 6.10 Lọc động sản phẩm (dynamic filter)
+
+- Method: `GET`
+- URL: `/api/v1/catalog/products/filter`
+- Query params hỗ trợ: `keyword`, `categoryIds`, `brandIds`, `skinTypes`, `minPrice`, `maxPrice`, `rating`, `promotions`
+- Success: `200 OK` với `Page<ProductCardResponse>`
+- Quy ước:
+    - `keyword` tìm theo `slug` và `description`
+    - `categoryIds` và `brandIds` dùng logic `OR` trong từng nhóm, `AND` giữa các nhóm
+    - `skinTypes` truyền danh sách tên loại da; backend sẽ chuẩn hoá qua `SkinTypeSlugUtils.toSlug(...)`
+    - `rating` lọc theo `averageRating >= rating`
+    - `minPrice` / `maxPrice` áp dụng trên khoảng giá của sản phẩm
+    - `promotions` hiện chưa được xử lý ở backend, sẽ bỏ qua nếu có gửi lên
+- Mặc định luôn chỉ trả sản phẩm `isActive = true`
+
+### 6.11 Filter by skin type / concern / price range
 
 - `/api/v1/catalog/products/skin-type/{skinType}`
 - `/api/v1/catalog/products/skin-concern/{skinConcern}`
@@ -688,7 +703,7 @@ ví dụ:api/v1/catalog/products/search?keyword=ordinary
 - Always encode path variables containing spaces or UTF-8 characters using encodeURIComponent().
 - No: GET /skin-type/da khô
 - Yes: skin-type/Da%20kh%C3%B4
-### 6.11 Cập nhật trạng thái Product
+### 6.12 Cập nhật trạng thái Product
 
 - Method: `PATCH`
 - URL: `/api/v1/catalog/products/{id}/status`
@@ -705,7 +720,7 @@ Ví dụ request:
 }
 ```
 
-### 6.12 Operational endpoints
+### 6.13 Operational endpoints
 
 - `POST /api/v1/catalog/products/{id}/update-price-range` — Roles: `ROLE_ADMIN`, used to recalc product min/max price from variants. Returns `200 OK`.
 - `POST /api/v1/catalog/products/total-sold/increment` — Accepts list `ProductSoldUpdateRequest` to increment `totalSold` counters. Typically used by order service or batch jobs. Returns `200 OK`.
