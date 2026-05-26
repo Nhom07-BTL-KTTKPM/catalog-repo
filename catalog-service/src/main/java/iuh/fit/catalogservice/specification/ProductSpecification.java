@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import iuh.fit.catalogservice.dto.request.ProductFilterRequest;
 import iuh.fit.catalogservice.entity.Product;
 import iuh.fit.catalogservice.util.SkinTypeSlugUtils;
+import iuh.fit.catalogservice.util.SlugGenerator;
 import jakarta.persistence.criteria.Predicate;
 
 /**
@@ -47,10 +48,13 @@ public final class ProductSpecification {
             return;
         }
 
-        String pattern = "%" + keyword.trim().toLowerCase() + "%";
+        String normalizedKeyword = keyword.trim().toLowerCase();
+        String textPattern = "%" + normalizedKeyword + "%";
+        String slugPattern = "%" + SlugGenerator.generate(keyword.trim()).toLowerCase() + "%";
         predicates.add(cb.or(
-                cb.like(cb.lower(root.get("slug")), pattern),
-                cb.like(cb.lower(root.get("description")), pattern)));
+            cb.like(cb.lower(root.get("name")), textPattern),
+            cb.like(cb.lower(root.get("description")), textPattern),
+            cb.like(cb.lower(root.get("slug")), slugPattern)));
     }
 
     private static void addCategoryPredicate(List<java.util.UUID> categoryIds,
