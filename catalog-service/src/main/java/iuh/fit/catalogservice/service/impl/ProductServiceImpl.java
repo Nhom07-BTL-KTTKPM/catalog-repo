@@ -467,6 +467,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ProductResponse> getFullProductsByCategory(UUID categoryId, Pageable pageable) {
+        log.debug("Fetching full products for category ID: {}", categoryId);
+
+        return productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable)
+                                .map(this::mapToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
         public Page<ProductCardResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable) {
         log.debug("Fetching products for root category ID: {} (including subcategories)", rootCategoryId);
 
@@ -481,6 +490,15 @@ public class ProductServiceImpl implements ProductService {
 
         return productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable)
                                 .map(this::mapToCardResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getFullProductsByBrand(UUID brandId, Pageable pageable) {
+        log.debug("Fetching full products for brand ID: {}", brandId);
+
+        return productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable)
+                                .map(this::mapToResponse);
     }
 
     @Override

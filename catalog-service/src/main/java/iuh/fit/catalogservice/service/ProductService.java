@@ -85,9 +85,19 @@ public interface ProductService {
     Page<ProductCardResponse> getProductsByRootCategory(UUID rootCategoryId, Pageable pageable);
 
     /**
+     * Get full products by category (internal use)
+     */
+    Page<ProductResponse> getFullProductsByCategory(UUID categoryId, Pageable pageable);
+
+    /**
      * Get products by brand
      */
     Page<ProductCardResponse> getProductsByBrand(UUID brandId, Pageable pageable);
+
+    /**
+     * Get full products by brand (internal use)
+     */
+    Page<ProductResponse> getFullProductsByBrand(UUID brandId, Pageable pageable);
 
     /**
      * Get products by category and brand
