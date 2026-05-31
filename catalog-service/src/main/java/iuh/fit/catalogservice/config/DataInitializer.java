@@ -45,7 +45,7 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("the-ordinary")
                 .description("Thương hiệu mỹ phẩm tối giản từ Canada, tập trung vào thành phần hoạt tính thuần khiết với giá cả hợp lý.")
                 .originCountry("Canada")
-                .logoUrl("https://media.elcompanies.com/images/e/estee-lauder-companies/global/our-brands/the-ordinary/the-ordinary-logo.png?h=140&iar=0&w=720")
+                .logoUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/the-ordinary-logo-png_seeklogo-323086.png")
                 .websiteUrl("https://theordinary.com")
                 .isActive(true)
                 .build();
@@ -55,7 +55,7 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("innisfree")
                 .description("Thương hiệu mỹ phẩm thiên nhiên từ đảo Jeju, Hàn Quốc. Sử dụng nguyên liệu hữu cơ và thân thiện với môi trường.")
                 .originCountry("Hàn Quốc")
-                .logoUrl("https://1000logos.net/wp-content/uploads/2023/11/Innisfree-Logo-2015.png")
+                .logoUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/innisfree.jpg")
                 .websiteUrl("https://innisfree.com")
                 .isActive(true)
                 .build();
@@ -65,7 +65,7 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("cerave")
                 .description("Thương hiệu dược mỹ phẩm từ Mỹ, được bác sĩ da liễu khuyên dùng với công thức chứa Ceramides và Hyaluronic Acid.")
                 .originCountry("Hoa Kỳ")
-                .logoUrl("https://seeklogo.com/images/C/cerave-logo-157A7264C9-seeklogo.com.png")
+                .logoUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/cerave.png")
                 .websiteUrl("https://cerave.com")
                 .isActive(true)
                 .build();
@@ -75,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("la-roche-posay")
                 .description("Dược mỹ phẩm đến từ Pháp, nổi tiếng với các công thức dịu nhẹ cho da nhạy cảm và da dầu mụn.")
                 .originCountry("Pháp")
-                .logoUrl("https://logos-world.net/wp-content/uploads/2023/01/La-Roche-Posay-Logo.png")
+                .logoUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/laroche.png")
                 .websiteUrl("https://www.laroche-posay.vn")
                 .isActive(true)
                 .build();
@@ -85,7 +85,7 @@ public class DataInitializer implements CommandLineRunner {
                 .slug("cosrx")
                 .description("Thương hiệu Hàn Quốc tập trung vào các giải pháp chăm sóc da tối giản, hiệu quả cho da mụn và da nhạy cảm.")
                 .originCountry("Hàn Quốc")
-                .logoUrl("https://cdn.shopify.com/s/files/1/0511/7562/0761/collections/Cosrx.png?v=1624603179")
+                .logoUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/COSRX_Logo.jpg")
                 .websiteUrl("https://www.cosrx.com")
                 .isActive(true)
                 .build();
@@ -98,7 +98,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Chăm sóc da")
                 .slug("skincare")
                 .description("Các sản phẩm chăm sóc da mặt và cơ thể")
-                .imageUrl("https://png.pngtree.com/png-vector/20220708/ourmid/pngtree-skin-care-logo-png-image_5774040.png")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/chamsoccothe.png")
                 .isActive(true)
                 .build();
         categoryRepository.save(skincare);
@@ -107,7 +107,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Serum & Tinh chất")
                 .slug("serum")
                 .description("Tinh chất dưỡng da cô đặc với thành phần hoạt tính cao")
-                .imageUrl("https://ohui.vn/wp-content/uploads/2023/06/image.png")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/tinhchat.png")
                 .parentId(skincare.getId())
                 .isActive(true)
                 .build();
@@ -117,7 +117,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Sữa rửa mặt")
                 .slug("cleanser")
                 .description("Các sản phẩm làm sạch da mặt nhẹ nhàng")
-                .imageUrl("https://cdn-icons-png.flaticon.com/512/10572/10572500.png")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/ruawmat.png")
                 .parentId(skincare.getId())
                 .isActive(true)
                 .build();
@@ -127,7 +127,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Kem dưỡng ẩm")
                 .slug("moisturizer")
                 .description("Kem dưỡng ẩm cho da mặt và body")
-                .imageUrl("https://i.pinimg.com/736x/55/93/24/559324d1105c3e8e54132f70a8968087.jpg")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/ruawmat.png")
                 .isActive(true)
                 .build();
         categoryRepository.save(moisturizer);
@@ -136,7 +136,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Toner & Nước hoa hồng")
                 .slug("toner")
                 .description("Làm sạch sâu, cân bằng pH và chuẩn bị cho các bước dưỡng tiếp theo")
-                .imageUrl("https://i.pinimg.com/736x/7a/f2/93/7af2938812dc0c519e53f183646ef23d.jpg")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/Toner.jpg")
                 .parentId(moisturizer.getId())
                 .isActive(true)
                 .build();
@@ -146,7 +146,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Kem chống nắng")
                 .slug("sunscreen")
                 .description("Bảo vệ da khỏi tia UVA/UVB và hỗ trợ chăm sóc da hằng ngày")
-                .imageUrl("https://i.pinimg.com/736x/72/41/ef/7241ef43382a2aef14bedd9f18cfc328.jpg")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/kcn.jpg")
                 .parentId(skincare.getId())
                 .isActive(true)
                 .build();
@@ -156,7 +156,7 @@ public class DataInitializer implements CommandLineRunner {
                 .name("Chăm sóc body")
                 .slug("body-care")
                 .description("Dưỡng thể, làm sáng và chăm sóc làn da toàn thân")
-                .imageUrl("https://i.pinimg.com/736x/b8/b6/4f/b8b64f46b4ebb8eed9354e819a20f69d.jpg")
+                .imageUrl("https://minhbucketttt.s3.ap-southeast-2.amazonaws.com/products/body.jpg")
                 .parentId(moisturizer.getId())
                 .isActive(true)
                 .build();
@@ -177,9 +177,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Mụn", "Lỗ chân lông to", "Dầu nhờn"),
                 new BigDecimal("185000"),
                 new BigDecimal("340000"),
-                4.7,
-                856,
-                1250,
+                0.0,
+                0,
+                0,
                 true,
                 serum,
                 theOrdinary
@@ -202,9 +202,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Da khô", "Thiếu ẩm", "Da nhạy cảm"),
                 new BigDecimal("420000"),
                 new BigDecimal("560000"),
-                4.6,
-                523,
-                890,
+                0.0,
+                0,
+                0,
                 true,
                 serum,
                 innisfree
@@ -226,9 +226,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Da khô", "Làm sạch nhẹ nhàng"),
                 new BigDecimal("210000"),
                 new BigDecimal("450000"),
-                4.8,
-                1205,
-                2340,
+                0.0,
+                0,
+                0,
                 true,
                 cleanser,
                 cerave
@@ -252,9 +252,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Da khô", "Thiếu nước", "Lão hóa"),
                 new BigDecimal("170000"),
                 new BigDecimal("320000"),
-                4.5,
-                678,
-                1120,
+                0.0,
+                0,
+                0,
                 true,
                 serum,
                 theOrdinary
@@ -276,9 +276,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Lỗ chân lông to", "Dầu nhờn", "Mụn đầu đen"),
                 new BigDecimal("250000"),
                 new BigDecimal("350000"),
-                4.7,
-                912,
-                1560,
+                0.0,
+                0,
+                0,
                 true,
                 skincare,
                 innisfree
@@ -300,9 +300,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Da khô", "Nứt nẻ", "Thiếu ẩm"),
                 new BigDecimal("280000"),
                 new BigDecimal("650000"),
-                4.9,
-                1543,
-                3200,
+                0.0,
+                0,
+                0,
                 true,
                 moisturizer,
                 cerave
@@ -326,9 +326,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Thâm nám", "Sạm da", "Lỗ chân lông to", "Mụn"),
                 new BigDecimal("230000"),
                 new BigDecimal("230000"),
-                4.3,
-                234,
-                456,
+                0.0,
+                0,
+                0,
                 false,
                 serum,
                 theOrdinary
@@ -349,9 +349,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Lão hóa", "Nếp nhăn", "Chảy xệ", "Thiếu độ đàn hồi"),
                 new BigDecimal("650000"),
                 new BigDecimal("850000"),
-                4.6,
-                345,
-                567,
+                0.0,
+                0,
+                0,
                 true,
                 moisturizer,
                 innisfree
@@ -374,9 +374,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Thiếu ẩm", "Da khô"),
                 new BigDecimal("150000"),
                 new BigDecimal("290000"),
-                4.4,
-                789,
-                1340,
+                0.0,
+                0,
+                0,
                 true,
                 moisturizer,
                 theOrdinary
@@ -398,9 +398,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Dầu nhờn", "Mụn", "Làm sạch sâu"),
                 new BigDecimal("220000"),
                 new BigDecimal("360000"),
-                4.7,
-                1067,
-                2130,
+                0.0,
+                0,
+                0,
                 true,
                 cleanser,
                 cerave
@@ -422,9 +422,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Mụn", "Thâm sau mụn", "Dầu nhờn"),
                 new BigDecimal("320000"),
                 new BigDecimal("420000"),
-                4.6,
-                431,
-                980,
+                0.0,
+                0,
+                0,
                 true,
                 serum,
                 larochePosay
@@ -447,9 +447,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Thiếu ẩm", "Da yếu", "Sau mụn"),
                 new BigDecimal("290000"),
                 new BigDecimal("390000"),
-                4.8,
-                710,
-                1480,
+                0.0,
+                0,
+                0,
                 true,
                 serum,
                 cosrx
@@ -472,9 +472,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Chống nắng", "Bảo vệ da", "Dùng hằng ngày"),
                 new BigDecimal("360000"),
                 new BigDecimal("480000"),
-                4.7,
-                388,
-                860,
+                0.0,
+                0,
+                0,
                 true,
                 sunscreen,
                 larochePosay
@@ -497,9 +497,9 @@ public class DataInitializer implements CommandLineRunner {
                 List.of("Dưỡng thể", "Làm mềm da", "Làm sáng da"),
                 new BigDecimal("130000"),
                 new BigDecimal("240000"),
-                4.5,
-                520,
-                1600,
+                0.0,
+                0,
+                0,
                 false,
                 bodyCare,
                 cerave
