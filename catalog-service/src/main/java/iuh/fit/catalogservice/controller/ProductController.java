@@ -1,0 +1,214 @@
+package iuh.fit.catalogservice.controller;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import iuh.fit.catalogservice.dto.request.ProductFilterRequest;
+import iuh.fit.catalogservice.dto.request.ProductRequest;
+import iuh.fit.catalogservice.dto.request.ProductSoldUpdateRequest;
+import iuh.fit.catalogservice.dto.request.ProductStatusRequest;
+import iuh.fit.catalogservice.dto.response.ProductCardResponse;
+import iuh.fit.catalogservice.dto.response.ProductOverviewResponse;
+import iuh.fit.catalogservice.dto.response.ProductResponse;
+import iuh.fit.catalogservice.service.ProductService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * REST Controller for Product management
+ */
+@RestController
+@RequestMapping("/api/v1/catalog/products")
+@RequiredArgsConstructor
+public class ProductController {
+
+    private final ProductService productService;
+
+    @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request) {
+        ProductResponse response = productService.createProduct(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductRequest request) {
+        ProductResponse response = productService.updateProduct(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductResponse> updateProductIsActive(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductStatusRequest request) {
+        ProductResponse response = productService.updateProductIsActive(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable UUID id) {
+        ProductResponse response = productService.getProductById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ProductCardResponse> getProductBySlug(@PathVariable String slug) {
+        ProductCardResponse response = productService.getProductBySlug(slug);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProductCardResponse>> getAllActiveProducts(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getAllActiveProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<Page<ProductCardResponse>> getAllProductsForAdmin(
+            @RequestParam(required = false) UUID brandId,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getAllProducts(brandId, categoryId, keyword, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/overview")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    public ResponseEntity<ProductOverviewResponse> getProductOverview() {
+        ProductOverviewResponse response = productService.getProductOverview();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/featured")
+    public ResponseEntity<Page<ProductCardResponse>> getFeaturedProducts(
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getFeaturedProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByCategory(
+            @PathVariable UUID categoryId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getProductsByCategory(categoryId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/category/root/{rootCategoryId}")
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByRootCategory(
+            @PathVariable UUID rootCategoryId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getProductsByRootCategory(rootCategoryId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/brand/{brandId}")
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByBrand(
+            @PathVariable UUID brandId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getProductsByBrand(brandId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/category/{categoryId}/brand/{brandId}")
+    public ResponseEntity<Page<ProductCardResponse>> getProductsByCategoryAndBrand(
+            @PathVariable UUID categoryId,
+            @PathVariable UUID brandId,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getProductsByCategoryAndBrand(categoryId, brandId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductCardResponse>> searchBySlugOrDescription(
+            @RequestParam String keyword,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.searchBySlugOrDescription(keyword, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ProductCardResponse>> filterProducts(
+            @ModelAttribute ProductFilterRequest filterRequest,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.filterProducts(filterRequest, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/best-selling")
+    public ResponseEntity<Page<ProductCardResponse>> getBestSellingProducts(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getBestSellingProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/top-rated")
+    public ResponseEntity<Page<ProductCardResponse>> getTopRatedProducts(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductCardResponse> response = productService.getTopRatedProducts(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/skin-type/{skinType}")
+    public ResponseEntity<Page<ProductResponse>> getProductsBySkinType(
+            @PathVariable String skinType,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductResponse> response = productService.getProductsBySkinType(skinType, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/skin-concern/{skinConcern}")
+    public ResponseEntity<Page<ProductResponse>> getProductsBySkinConcern(
+            @PathVariable String skinConcern,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductResponse> response = productService.getProductsBySkinConcern(skinConcern, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/price-range")
+    public ResponseEntity<Page<ProductResponse>> getProductsByPriceRange(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<ProductResponse> response = productService.getProductsByPriceRange(minPrice, maxPrice, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id:[0-9a-fA-F\\\\-]{36}}/update-price-range")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> updateProductPriceRange(@PathVariable UUID id) {
+        productService.updateProductPriceRange(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/total-sold/increment")
+    public ResponseEntity<Void> incrementTotalSold(@RequestBody List<ProductSoldUpdateRequest> requests) {
+        productService.incrementTotalSold(requests);
+        return ResponseEntity.ok().build();
+    }
+}
